@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('plan_id')->constrained('subscription_plans')->onDelete('cascade');
+            $table->foreignId('payments_id')->constrained('payments')->onDelete('cascade');
             $table->unsignedInteger('used_event')->default(0);
 
             // Karena paket Lifetime, tidak ada expired_at

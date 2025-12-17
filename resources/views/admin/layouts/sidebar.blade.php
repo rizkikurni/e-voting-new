@@ -60,7 +60,7 @@
         <li class="menu-label">Subscription</li>
 
         <li>
-            <a href="{{ route('plans.index') }}">
+            <a href="{{ route('subscription-plans.index') }}">
                 <div class="parent-icon"><i class="bi bi-gem"></i></div>
                 <div class="menu-title">Daftar Paket</div>
             </a>
@@ -111,7 +111,7 @@
 
         <li>
             <a href="{{ route('logout') }}"
-               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 <div class="parent-icon"><i class="bi bi-box-arrow-right"></i></div>
                 <div class="menu-title">Logout</div>
             </a>
