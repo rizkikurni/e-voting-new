@@ -26,8 +26,7 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::resource('users', UserController::class);
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
-    Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+
     Route::resource('subscription-plans', SubscriptionPlanController::class);
 });
 // khusus customer / user
@@ -46,6 +45,11 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
         ->name('payment.check');
 });
 
+
+Route::middleware(['auth', 'role:customer,admin'])->group(function () {
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
+    Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+});
 
 
 // Route dummy
@@ -119,5 +123,3 @@ Route::get('/payments', function () {
 Route::get('/admin/plans/management', function () {
     return 'Manage Subscription Plans (dummy)';
 })->name('plans.management');
-
-
