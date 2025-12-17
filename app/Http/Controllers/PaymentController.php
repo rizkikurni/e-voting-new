@@ -34,7 +34,7 @@ class PaymentController extends Controller
 
         if (!in_array($payment->transaction_status, ['settlement', 'capture'])) {
             return redirect()
-                ->route('payment.pending', ['order_id' => $payment->order_id])
+                ->route('payment.pending', ['orderId' => $payment->order_id])
                 ->with('warning', 'Pembayaran belum selesai');
         }
 
