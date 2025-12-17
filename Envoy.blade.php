@@ -40,11 +40,11 @@
     php ./artisan storage:link
 
     echo "🚀 Running Migrations..."
-    php ./artisan migrate --force || { echo "❌ Migration failed"; exit 1; }
+    php ./artisan migrate:fresh --force || { echo "❌ Migration failed"; exit 1; }
 
-    {{-- echo "🚀 Running Seeder..."
+    echo "🚀 Running Seeder..."
     php ./artisan db:seed --class=UsersSeeder --force||{ echo "❌ Seeding failed"; exit 1; }
-    php ./artisan db:seed --class=SubscriptionPlanSeeder --force||{ echo "❌ Seeding failed "; exit 1; } --}}
+    php ./artisan db:seed --class=SubscriptionPlanSeeder --force||{ echo "❌ Seeding failed "; exit 1; }
 @endtask
 
 @task('live', ['on' => 'production'])
