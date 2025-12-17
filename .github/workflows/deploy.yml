@@ -2,7 +2,7 @@ name: Deploy Laravel App
 
 on:
   push:
-    branches: [danu]
+    branches: [staging]
 
 jobs:
   deploy:
