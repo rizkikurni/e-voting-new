@@ -3,7 +3,7 @@
 @setup
     $repo = 'https://github.com/rizkikurni/e-voting-new.git';
     $appDir = '/var/www/e-voting';
-    $branch = 'danu';
+    $branch = 'staging';
 
     date_default_timezone_set('Asia/Jakarta');
     $date = date('YmdHis');
