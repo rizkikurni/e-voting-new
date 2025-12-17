@@ -80,7 +80,7 @@
                             <div class="col-lg-8 col-sm-12">
                                 <div class="slider-content second-slider-content">
                                     <h2 data-animation="fadeInUp animated" data-delay=".3s">
-                                        Pemilihan Ketua BEM 2025
+                                        Pemilihan Ketua Hima 2024
                                     </h2>
 
                                     <p class="mt-15 mb-30">
