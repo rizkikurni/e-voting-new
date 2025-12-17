@@ -22,8 +22,7 @@ return new class extends Migration
             // Trial system
             $table->boolean('is_trial_used')->default(false);
 
-            // Customization (for customer)
-            $table->string('custom_logo')->nullable();
+            $table->string('photo_path')->nullable();
 
             $table->timestamps();
         });

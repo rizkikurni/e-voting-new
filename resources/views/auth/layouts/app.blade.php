@@ -5,7 +5,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="{{ asset('admin/assets/images/favicon-32x32.png') }}" type="image/png" />
+    <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png" />
     <!-- Bootstrap CSS -->
     <link href="{{ asset('admin/assets/css/bootstrap.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('admin/assets/css/bootstrap-extended.css') }}" rel="stylesheet" />
@@ -17,7 +17,7 @@
     <!-- loader-->
     <link href="{{ asset('admin/assets/css/pace.min.css') }}" rel="stylesheet" />
 
-    <title>Snacked - Bootstrap 5 Admin Template</title>
+    <title> @yield('title') | E-voting</title>
 </head>
 
 <body>

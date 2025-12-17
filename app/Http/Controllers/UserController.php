@@ -30,23 +30,33 @@ class UserController extends Controller
      * Save new user.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'name'     => 'required',
-            'email'    => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role'     => 'required|in:admin,customer',
-        ]);
+{
+    $request->validate([
+        'name'     => 'required',
+        'email'    => 'required|email|unique:users',
+        'password' => 'required|min:6',
+        'role'     => 'required|in:admin,customer',
+        'photo'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
 
-        User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role,
-        ]);
+    $photoPath = null;
 
-        return redirect()->route('users.index')->with('success', 'User berhasil dibuat');
+    if ($request->hasFile('photo')) {
+        $photoPath = time() . '.' . $request->photo->extension();
+        $request->photo->move(public_path('photo'), $photoPath);
     }
+
+    User::create([
+        'name'       => $request->name,
+        'email'      => $request->email,
+        'password'   => Hash::make($request->password),
+        'role'       => $request->role,
+        'photo_path' => $photoPath,
+    ]);
+
+    return redirect()->route('users.index')->with('success', 'User berhasil dibuat');
+}
+
 
     /**
      * Show form edit user.
@@ -65,28 +75,41 @@ class UserController extends Controller
      * Update user.
      */
     public function update(Request $request, User $user)
-    {
-        $request->validate([
-            'name'  => 'required',
-            'email' => "required|email|unique:users,email,$user->id",
-            'role'  => 'required|in:admin,customer',
-        ]);
+{
+    $request->validate([
+        'name'  => 'required',
+        'email' => "required|email|unique:users,email,$user->id",
+        'role'  => 'required|in:admin,customer',
+        'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
 
-        $data = [
-            'name'  => $request->name,
-            'email' => $request->email,
-            'role'  => $request->role,
-        ];
+    $data = [
+        'name'  => $request->name,
+        'email' => $request->email,
+        'role'  => $request->role,
+    ];
 
-        if ($request->password) {
-            $request->validate(['password' => 'min:6']);
-            $data['password'] = Hash::make($request->password);
+    if ($request->password) {
+        $request->validate(['password' => 'min:6']);
+        $data['password'] = Hash::make($request->password);
+    }
+
+    if ($request->hasFile('photo')) {
+        // hapus foto lama (opsional tapi beradab)
+        if ($user->photo_path && file_exists(public_path('photo/' . $user->photo_path))) {
+            unlink(public_path('photo/' . $user->photo_path));
         }
 
-        $user->update($data);
+        $photoPath = time() . '.' . $request->photo->extension();
+        $request->photo->move(public_path('photo'), $photoPath);
 
-        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui');
+        $data['photo_path'] = $photoPath;
     }
+
+    $user->update($data);
+
+    return redirect()->route('users.index')->with('success', 'User berhasil diperbarui');
+}
 
     /**
      * Delete user.
@@ -169,5 +192,58 @@ class UserController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/login');
+    }
+
+    /**
+     * Show profile page.
+     */
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('admin.users.profile', compact('user'));
+    }
+
+    /**
+     * Update profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'password' => 'nullable|min:6|confirmed',
+        ]);
+
+        $data = [
+            'name'  => $request->name,
+            'email' => $request->email,
+        ];
+
+        // Update password (jika diisi)
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        // Update photo
+        if ($request->hasFile('photo')) {
+
+            // hapus foto lama
+            if ($user->photo_path && file_exists(public_path('photo/' . $user->photo_path))) {
+                unlink(public_path('photo/' . $user->photo_path));
+            }
+
+            $photoName = time() . '.' . $request->photo->extension();
+            $request->photo->move(public_path('photo'), $photoName);
+
+            $data['photo_path'] = $photoName;
+        }
+
+        $user->update($data);
+
+
+        return back()->with('success', 'Profil berhasil diperbarui');
     }
 }

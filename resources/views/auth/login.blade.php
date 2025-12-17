@@ -1,5 +1,9 @@
 @extends('auth.layouts.app')
 
+@section('title')
+Login
+@endsection
+
 @section('content')
     <div class="wrapper">
         <main class="authentication-content">
@@ -61,8 +65,8 @@
                                                     <input class="form-check-input" type="checkbox" checked>
                                                     <label class="form-check-label">Remember Me</label>
                                                 </div>
-                                            </div>
-
+                                            </div> --}}
+{{--
                                             <div class="col-6 text-end">
                                                 <a href="#">Forgot Password?</a>
                                             </div> --}}
@@ -73,10 +77,13 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-12">
+                                            <div class="col-6">
                                                 <p class="mb-0">Tidak punya akun?
                                                     <a href="{{ route('register') }}">Register</a>
                                                 </p>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <a href="{{ route('home') }}"><i class="lni lni-arrow-left"></i> Kembali</a>
                                             </div>
 
                                         </div>

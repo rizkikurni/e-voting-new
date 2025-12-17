@@ -43,12 +43,18 @@
                     <!-- Button -->
                     <div class="col-xl-3 text-right d-none d-xl-block">
                         <div class="header-btn second-header-btn">
-                            <a href="{{ route('login') }}" class="btn">
-                                Login
-                            </a>
-                            {{-- <a href="{{ route('register') }}" class="btn btn-border ml-2">
-                                Daftar
-                            </a> --}}
+                           @guest
+    <a href="{{ route('login') }}" class="btn">
+        Login
+    </a>
+@endguest
+
+@auth
+    <a href="{{ route('dashboard') }}" class="btn">
+        Dashboard
+    </a>
+@endauth
+
                         </div>
                     </div>
 

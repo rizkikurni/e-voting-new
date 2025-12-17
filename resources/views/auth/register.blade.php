@@ -1,5 +1,9 @@
 @extends('auth.layouts.app')
 
+@section('title')
+Login
+@endsection
+
 @section('content')
     <div class="wrapper">
         <main class="authentication-content">
@@ -79,10 +83,14 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-12">
+                                            <div class="col-6">
                                                 <p class="mb-0">Sudah punya akun?
                                                     <a href="{{ route('login') }}">Login</a>
                                                 </p>
+                                            </div>
+
+                                            <div class="col-6 text-end">
+                                                <a href="{{ route('home') }}"><i class="lni lni-arrow-left"></i> Kembali</a>
                                             </div>
 
                                         </div>

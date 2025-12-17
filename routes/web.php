@@ -21,6 +21,8 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     // User resource
     Route::resource('users', UserController::class);
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
+    Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
 
 });
 
@@ -97,9 +99,3 @@ Route::get('/admin/plans/management', function () {
 })->name('plans.management');
 
 
-//
-// ====== PROFILE / SETTINGS ======
-//
-Route::get('/profile', function () {
-    return 'Profile Settings (dummy)';
-})->name('profile.index');
