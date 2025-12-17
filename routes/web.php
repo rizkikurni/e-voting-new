@@ -29,11 +29,20 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 // khusus customer / user
 Route::middleware(['auth', 'role:customer'])->group(function () {
+
     Route::get('/checkout/{plan}', [CheckoutController::class, 'checkout'])
         ->name('checkout');
+
     Route::get('/payment/success', [PaymentController::class, 'success'])
-    ->name('payment.success');
+        ->name('payment.success');
+
+    Route::get('/payment/pending/{orderId}', [PaymentController::class, 'pending'])
+        ->name('payment.pending');
+
+    Route::get('/payment/check/{orderId}', [PaymentController::class, 'checkStatus'])
+        ->name('payment.check');
 });
+
 
 
 // Route dummy

@@ -59,7 +59,10 @@ class CheckoutController extends Controller
             'snap_token' => $snapToken,
         ]);
 
-        return view('payments.checkout', compact('snapToken', 'plan', 'payment'));
-
+        return view('payments.checkout', [
+            'snapToken' => $snapToken,
+            'plan'      => $plan,
+            'payment'   => $payment, // PENTING
+        ]);
     }
 }

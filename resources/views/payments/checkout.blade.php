@@ -459,6 +459,9 @@
                                 <i class="fas fa-arrow-left"></i>
                                 Kembali ke Dashboard
                             </a>
+                            <a href="{{ route('payment.pending', $payment->order_id) }}">
+                                Lihat Status Pembayaran
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -480,9 +483,8 @@
                         "{{ route('payment.success') }}?order_id={{ $payment->order_id }}";
                 },
                 onPending: function(result) {
-                    console.log('Payment pending:', result);
                     window.location.href =
-                        "{{ route('payment.success') }}?order_id={{ $payment->order_id }}";
+                        "{{ route('payment.pending', $payment->order_id) }}?order_id={{ $payment->order_id }}";
                 },
                 onError: function(result) {
                     console.error('Payment error:', result);

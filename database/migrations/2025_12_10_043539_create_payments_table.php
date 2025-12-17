@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->decimal('amount', 12, 2);
             $table->string('payment_method', 50)->nullable();
             $table->string('payment_gateway', 50)->default('midtrans');
-
+            $table->json('payment_instruction')->nullable();
             $table->string('transaction_id')->nullable();
             $table->enum('transaction_status', [
                 'pending',
