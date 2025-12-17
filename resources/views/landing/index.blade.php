@@ -297,82 +297,66 @@
                 </div>
             </div>
             <div class="container">
-
                 <div class="row">
-                    <div class="col-lg-4 col-md-6">
-                        <div class="pricing-box text-center mb-30 wow fadeInDown animated"
-                            data-animation="fadeInDown animated" data-delay=".2s">
-                            <div class="pricing-head">
-                                <h4>BASIC</h4>
-                                <div class="price-count mb-30">
-                                    <h2><small>Rp</small>20k</h2>
-                                </div>
-                            </div>
-                            <div class="pricing-body mb-40">
-                                <p>Time to sit down and think about what kind of content should be created, time to stop.
-                                </p>
-                                <strong>All prices exclude 25% VAT</strong>
-                                <div class="bar">
-                                    <span style="width:50%;"></span>
-                                </div>
-                                <div class="bar-no">350/500</div>
-                                <div class="pricing-btn mt-40">
-                                    <a href="#" class="btn"><i class="far fa-ticket-alt"></i> Pilih Paket </a>
-                                </div>
-                            </div>
 
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6">
-                        <div class="pricing-box active text-center mb-30 wow fadeInDown animated"
-                            data-animation="fadeInDown animated" data-delay=".2s">
-                            <div class="tag">Exclusive author</div>
-                            <div class="pricing-head">
-                                <h4>Gold</h4>
-                                <div class="price-count mb-30">
-                                    <h2><small>RP</small>50k</h2>
-                                </div>
-                            </div>
-                            <div class="pricing-body mb-40">
-                                <p>Time to sit down and think about what kind of content should be created, time to stop.
-                                </p>
-                                <strong>All prices exclude 25% VAT</strong>
-                                <div class="bar">
-                                    <span style="width:50%;"></span>
-                                </div>
-                                <div class="bar-no">350/500</div>
-                                <div class="pricing-btn mt-40">
-                                    <a href="#" class="btn"><i class="far fa-ticket-alt"></i> Pilih Paket </a>
-                                </div>
-                            </div>
+                    @foreach ($plans as $index => $plan)
+                        <div class="col-lg-4 col-md-6">
+                            <div class="pricing-box
+                    {{ $index == 1 ? 'active' : '' }}
+                    text-center mb-30 wow fadeInDown animated"
+                                data-animation="fadeInDown animated" data-delay=".2s">
 
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6">
-                        <div class="pricing-box text-center mb-30 wow fadeInDown animated"
-                            data-animation="fadeInDown animated" data-delay=".2s">
-                            <div class="pricing-head">
-                                <h4>Platinum</h4>
-                                <div class="price-count mb-30">
-                                    <h2><small>Rp</small>100k</h2>
+                                @if ($index == 1)
+                                    <div class="tag">Rekomendasi</div>
+                                @endif
+
+                                <div class="pricing-head">
+                                    <h4>{{ strtoupper($plan->name) }}</h4>
+                                    <div class="price-count mb-30">
+                                        <h2>
+                                            <small>Rp</small>
+                                            {{ number_format($plan->price, 0, ',', '.') }}
+                                        </h2>
+                                    </div>
                                 </div>
+
+                                <div class="pricing-body mb-40">
+                                    <p>
+                                        Cocok untuk kebutuhan {{ strtolower($plan->name) }} dengan fitur lengkap.
+                                    </p>
+
+                                    <ul class="text-start mb-20">
+                                        <li>✔ Maks {{ $plan->max_event }} Event</li>
+                                        <li>✔ {{ $plan->max_candidates }} Kandidat</li>
+                                        <li>✔ {{ $plan->max_voters }} Pemilih</li>
+
+                                        @if ($plan->features['report'] ?? false)
+                                            <li>✔ Laporan & Statistik</li>
+                                        @endif
+
+                                        @if ($plan->features['export'] ?? false)
+                                            <li>✔ Export Data</li>
+                                        @endif
+
+                                        @if ($plan->features['custom'] ?? false)
+                                            <li>✔ Fitur Custom</li>
+                                        @endif
+                                    </ul>
+
+                                    <div class="pricing-btn mt-40">
+                                        <a href="{{ route('login') }}" class="btn">
+                                            <i class="far fa-ticket-alt"></i> Pilih Paket
+                                        </a>
+                                    </div>
+                                </div>
+
                             </div>
-                            <div class="pricing-body">
-                                <p>Time to sit down and think about what kind of content should be created, time to stop.
-                                </p>
-                                <strong>All prices exclude 25% VAT</strong>
-                                <div class="bar">
-                                    <span style="width:50%;"></span>
-                                </div>
-                                <div class="bar-no">350/500</div>
-                                <div class="pricing-btn mt-40">
-                                    <a href="#" class="btn"><i class="far fa-ticket-alt"></i> Pilih Paket </a>
-                                </div>
-                            </div>
                         </div>
-                    </div>
+                    @endforeach
+
                 </div>
             </div>
+
         </section>
         <!-- pricing-area-end -->
 

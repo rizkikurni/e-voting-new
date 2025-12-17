@@ -9,6 +9,7 @@ class UserPlan extends Model
     protected $fillable = [
         'user_id',
         'plan_id',
+        'payment_id',
         'used_event',
         'purchased_at',
         'payment_status',
@@ -27,6 +28,11 @@ class UserPlan extends Model
     public function plan()
     {
         return $this->belongsTo(SubscriptionPlan::class);
+    }
+
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
     }
 
     public function events()
