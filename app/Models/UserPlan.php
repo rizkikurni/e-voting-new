@@ -9,9 +9,10 @@ class UserPlan extends Model
     protected $fillable = [
         'user_id',
         'plan_id',
+        'payment_id',
         'used_event',
-        'purchased_at',
         'payment_status',
+        'purchased_at',
     ];
 
     protected $casts = [
@@ -29,10 +30,15 @@ class UserPlan extends Model
         return $this->belongsTo(SubscriptionPlan::class);
     }
 
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
+    }
+
     public function events()
     {
         return $this->hasMany(Event::class, 'plan_id', 'plan_id')
-                    ->where('user_id', $this->user_id);
+            ->where('user_id', $this->user_id);
     }
 
     // HELPER: cek quota

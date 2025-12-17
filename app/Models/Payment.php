@@ -9,11 +9,21 @@ class Payment extends Model
     protected $fillable = [
         'user_id',
         'plan_id',
-        'amount',
-        'method',
-        'payment_gateway',
         'order_id',
-        'status',
+        'snap_token',
+        'amount',
+        'payment_method',
+        'payment_gateway',
+        'transaction_id',
+        'transaction_status',
+        'fraud_status',
+        'transaction_time',
+        'payload_response',
+    ];
+
+    protected $casts = [
+        'payload_response' => 'array',
+        'transaction_time' => 'datetime',
     ];
 
     // RELATIONS

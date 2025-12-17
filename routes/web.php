@@ -1,9 +1,12 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SubscriptionPlanController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -18,13 +21,32 @@ Route::post('/register', [UserController::class, 'register']);
 
 Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 
-Route::middleware(['auth'])->group(function () {
-    // User resource
+
+// khusus admin
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
     Route::resource('users', UserController::class);
     Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
     Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
-
+    Route::resource('subscription-plans', SubscriptionPlanController::class);
 });
+// khusus customer / user
+Route::middleware(['auth', 'role:customer'])->group(function () {
+
+    Route::get('/checkout/{plan}', [CheckoutController::class, 'checkout'])
+        ->name('checkout');
+
+    Route::get('/payment/success', [PaymentController::class, 'success'])
+        ->name('payment.success');
+
+    Route::get('/payment/pending/{orderId}', [PaymentController::class, 'pending'])
+        ->name('payment.pending');
+
+    Route::get('/payment/check/{orderId}', [PaymentController::class, 'checkStatus'])
+        ->name('payment.check');
+});
+
+
 
 // Route dummy
 
