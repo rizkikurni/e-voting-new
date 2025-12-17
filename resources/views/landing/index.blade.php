@@ -344,7 +344,7 @@
                                     </ul>
 
                                     <div class="pricing-btn mt-40">
-                                        <a href="{{ route('login') }}" class="btn">
+                                        <a href="{{ route('checkout', $plan->id) }}" class="btn">
                                             <i class="far fa-ticket-alt"></i> Pilih Paket
                                         </a>
                                     </div>

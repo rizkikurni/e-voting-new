@@ -5,37 +5,37 @@ namespace Database\Seeders;
 use App\Models\SubscriptionPlan;
 use Illuminate\Database\Seeder;
 
-class SubscriptionPlansSeeder extends Seeder
+class SubscriptionPlanSeeder extends Seeder
 {
     public function run(): void
     {
-        $plans = [
-            ['Basic', 25000, 1, 5, 100],
-            ['Standard', 50000, 2, 10, 300],
-            ['Premium', 100000, 5, 20, 1000],
-        ];
+        SubscriptionPlan::create([
+            'name' => 'Basic',
+            'price' => 100000,
+            'features' => ['report' => false, 'export' => false, 'custom' => false],
+            'max_event' => 1,
+            'max_candidates' => 10,
+            'max_voters' => 100,
+        ]);
 
-        foreach ($plans as $p) {
-            SubscriptionPlan::create([
-                'name'          => $p[0],
-                'price'         => $p[1],
-                'features'      => ['report' => true, 'export' => true],
-                'max_event'     => $p[2],
-                'max_candidates'=> $p[3],
-                'max_voters'    => $p[4],
-            ]);
-        }
+        SubscriptionPlan::create([
+            'name' => 'Standard',
+            'price' => 200000,
+            'features' => ['report' => true, 'export' => false, 'custom' => false],
+            'max_event' => 5,
+            'max_candidates' => 50,
+            'max_voters' => 1000,
+        ]);
 
-        // Tambah random 12 paket agar total minimal 15
-        for ($i = 1; $i <= 12; $i++) {
-            SubscriptionPlan::create([
-                'name' => "Plan Custom $i",
-                'price' => rand(20000,150000),
-                'features' => ['custom' => true],
-                'max_event' => rand(1, 5),
-                'max_candidates' => rand(5, 20),
-                'max_voters' => rand(50, 1000),
-            ]);
-        }
+        SubscriptionPlan::create([
+            'name' => 'Premium',
+            'price' => 250000,
+            'features' => ['report' => true, 'export' => true, 'custom' => true],
+            'max_event' => 999,
+            'max_candidates' => 999,
+            'max_voters' => 999999,
+        ]);
+
+        $this->command->info('Subscription plans seeded successfully!');
     }
 }

@@ -11,8 +11,8 @@ class UserPlan extends Model
         'plan_id',
         'payment_id',
         'used_event',
-        'purchased_at',
         'payment_status',
+        'purchased_at',
     ];
 
     protected $casts = [
@@ -38,7 +38,7 @@ class UserPlan extends Model
     public function events()
     {
         return $this->hasMany(Event::class, 'plan_id', 'plan_id')
-                    ->where('user_id', $this->user_id);
+            ->where('user_id', $this->user_id);
     }
 
     // HELPER: cek quota

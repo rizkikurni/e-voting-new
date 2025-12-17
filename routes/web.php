@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubscriptionPlanController;
 
@@ -26,7 +27,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('subscription-plans', SubscriptionPlanController::class);
 });
 // khusus customer / user
-Route::middleware(['auth', 'role:customer'])->group(function () {});
+Route::middleware(['auth', 'role:customer'])->group(function () {
+    Route::get('/checkout/{plan}', [CheckoutController::class, 'checkout'])
+        ->name('checkout');
+});
 
 
 // Route dummy
