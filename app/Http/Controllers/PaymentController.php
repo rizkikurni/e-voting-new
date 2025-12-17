@@ -11,27 +11,33 @@ use Midtrans\Transaction;
 
 class PaymentController extends Controller
 {
+
     public function success(Request $request)
     {
-        // Pastikan user login
-        if (!Auth::check()) {
-            abort(403, 'Unauthorized');
-        }
-
         $orderId = $request->query('order_id');
 
-        if (!$orderId) {
-            abort(404, 'Order ID tidak ditemukan');
-        }
-
-
-
-        // Ambil data payment beserta relasi plan
-        $payment = Payment::with('plan')
-            ->where('order_id', $orderId)
+        $payment = Payment::where('order_id', $orderId)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
+        // Ambil status real-time dari Midtrans
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = false;
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+
+        $statusResponse = Transaction::status($orderId);
+        $status = (object) $statusResponse;
+
+        // Update database
+        $payment->update([
+            'transaction_status' => $status->transaction_status,
+            'payment_method'     => $status->payment_type ?? null,
+            'paid_at'            => in_array($status->transaction_status, ['settlement', 'capture'])
+                ? now() : null,
+        ]);
+
+        // Sekarang cek status
         if (!in_array($payment->transaction_status, ['settlement', 'capture'])) {
             return redirect()
                 ->route('payment.pending', ['orderId' => $payment->order_id])
@@ -40,6 +46,7 @@ class PaymentController extends Controller
 
         return view('payments.success', compact('payment'));
     }
+
 
 
     public function pending($orderId)
