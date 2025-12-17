@@ -81,7 +81,7 @@ class PaymentController extends Controller
             ->firstOrFail();
 
         return response()->json([
-            'status' => in_array($payment->transaction_status, ['settlement', 'capture'])
+            'status' => \in_array($payment->transaction_status, ['settlement', 'capture'])
                 ? 'paid'
                 : 'pending'
         ]);
