@@ -36,4 +36,9 @@ class Payment extends Model
     {
         return $this->belongsTo(SubscriptionPlan::class);
     }
+
+    public function userPlan()
+    {
+        return $this->hasOne(UserPlan::class);
+    }
 }

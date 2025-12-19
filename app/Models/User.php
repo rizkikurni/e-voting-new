@@ -71,13 +71,19 @@ class User extends Authenticatable
     }
 
     // HELPER: cek apakah user masih punya jatah membuat event
-    public function hasEventQuota()
+    // public function hasEventQuota()
+    // {
+    //     return $this->plans()
+    //         ->where('payment_status', 'paid')
+    //         ->join('subscription_plans', 'subscription_plans.id', '=', 'user_plans.plan_id')
+    //         ->whereColumn('user_plans.used_event', '<', 'subscription_plans.max_event')
+    //         ->exists();
+    // }
+    public function hasEventQuota(): bool
     {
-        return $this->plans()
+        return $this->plans
             ->where('payment_status', 'paid')
-            ->join('subscription_plans', 'subscription_plans.id', '=', 'user_plans.plan_id')
-            ->whereColumn('user_plans.used_event', '<', 'subscription_plans.max_event')
-            ->exists();
+            ->contains(fn($plan) => $plan->hasAvailableEvent());
     }
 
     // Ambil 1 paket yang masih punya jatah

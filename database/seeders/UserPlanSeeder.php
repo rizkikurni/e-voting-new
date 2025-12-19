@@ -2,23 +2,24 @@
 
 namespace Database\Seeders;
 
+use App\Models\Payment;
 use App\Models\UserPlan;
 use App\Models\User;
 use App\Models\SubscriptionPlan;
 use Illuminate\Database\Seeder;
 
-class UserPlansSeeder extends Seeder
+class UserPlanSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = User::all();
-        $plans = SubscriptionPlan::all();
+        $payments = Payment::all();
 
-        foreach (range(1, 15) as $i) {
+        foreach ($payments as $payment) {
             UserPlan::create([
-                'user_id' => $users->random()->id,
-                'plan_id' => $plans->random()->id,
-                'used_event' => rand(0, 1),
+                'user_id' => $payment->user_id,
+                'payment_id' => $payment->id,
+                'plan_id' => $payment->plan_id,
+                'used_event' => rand(0, 3),
                 'purchased_at' => now()->subDays(rand(1, 30)),
                 'payment_status' => 'paid',
             ]);

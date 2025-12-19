@@ -8,29 +8,28 @@ use App\Models\SubscriptionPlan;
 use Illuminate\Database\Seeder;
 use Faker\Factory;
 
-class EventsSeeder extends Seeder
+class EventSeeder extends Seeder
 {
     public function run(): void
     {
-        $faker = Factory::create();
-        $users = User::all();
-        $plans = SubscriptionPlan::all();
+        $users = User::where('role', 'customer')->get();
 
-        foreach (range(1, 15) as $i) {
-            $start = $faker->dateTimeBetween('-10 days', '+10 days');
-            $end = (clone $start)->modify('+2 hours');
+        foreach ($users as $user) {
+            $total = rand(1, 3);
 
-            Event::create([
-                'user_id' => $users->random()->id,
-                'plan_id' => $plans->random()->id,
-                'title' => "Event Voting $i",
-                'description' => $faker->sentence(),
-                'is_trial_event' => false,
-                'start_time' => $start,
-                'end_time' => $end,
-                'is_published' => rand(0, 1),
-                'is_locked' => rand(0, 1),
-            ]);
+            for ($i = 1; $i <= $total; $i++) {
+                Event::create([
+                    'user_id' => $user->id,
+                    'plan_id' => rand(1, 3),
+                    // perlu diperbaiki ini
+                    'user_plan_id' => rand(1, 3),
+                    'title' => "Event {$user->id} - $i",
+                    'description' => 'Event voting dummy',
+                    'start_time' => now(),
+                    'end_time' => now()->addDays(rand(1, 5)),
+                    'is_published' => true,
+                ]);
+            }
         }
     }
 }

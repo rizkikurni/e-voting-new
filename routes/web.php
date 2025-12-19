@@ -1,14 +1,26 @@
 <?php
 
+use App\Http\Controllers\CandidateController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\SubscriptionPlanController;
+use App\Http\Controllers\VoteController;
+use App\Http\Controllers\VoterTokenController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+// Route::get('/vote', [HomeController::class, 'vote'])->name('vote');
+// Route::get('/vote-result', [HomeController::class, 'voteResult'])->name('vote.result');
+Route::get('/vote/{event}', [HomeController::class, 'vote'])
+    ->name('voting.show');
+
+Route::post('/vote/{event}', [HomeController::class, 'voteStore'])
+    ->name('voting.store');
+
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 
@@ -26,8 +38,7 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::resource('users', UserController::class);
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
-    Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+
     Route::resource('subscription-plans', SubscriptionPlanController::class);
 });
 // khusus customer / user
@@ -46,78 +57,142 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
         ->name('payment.check');
 });
 
+Route::middleware(['auth', 'role:customer,admin'])->group(function () {
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
+    Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+
+    Route::resource('events', EventController::class);
+    Route::post('events/{event}/publish', [EventController::class, 'publish'])->name('events.publish');
+    Route::post('events/{event}/lock', [EventController::class, 'lock'])->name('events.lock');
 
 
-// Route dummy
+    Route::get('/candidates', [CandidateController::class, 'all'])->name('candidates.index');
+    Route::resource('events.candidates', CandidateController::class);
 
-// ====== EVENTS ======
-//
-Route::get('/vote', function () {
-    return view('landing.vote');
-})->name('vote');
+    // Ringkasan token per event
+    Route::get('/voter-tokens', [VoterTokenController::class, 'index'])
+        ->name('voter-tokens.index');
 
-Route::get('/vote-result', function () {
-    return view('landing.vote-result');
-})->name('vote-result');
+    // Detail token berdasarkan event
+    Route::get('/voter-tokens/{event}', [VoterTokenController::class, 'show'])
+        ->name('voter-tokens.show');
 
-Route::get('/events', function () {
-    return 'Daftar Event (dummy)';
-})->name('events.index');
+    // Generate token baru (awal)
+    Route::get('/voter-tokens/{event}/create', [VoterTokenController::class, 'create'])
+        ->name('voter-tokens.create');
+    Route::post('/voter-tokens/{event}', [VoterTokenController::class, 'store'])
+        ->name('voter-tokens.store');
 
-Route::get('/events/create', function () {
-    return 'Create Event Page (dummy)';
-})->name('events.create');
+    // Tambah jumlah token
+    Route::get('/voter-tokens/{event}/add', [VoterTokenController::class, 'addView'])
+        ->name('voter-tokens.add-view');
+    Route::post('/voter-tokens/{event}/add', [VoterTokenController::class, 'add'])
+        ->name('voter-tokens.add');
 
-
-//
-// ====== CANDIDATES ======
-//
-Route::get('/candidates', function () {
-    return 'Daftar Kandidat (dummy)';
-})->name('candidates.index');
-
-
-//
-// ====== VOTER TOKENS ======
-//
-Route::get('/voter-tokens', function () {
-    return 'Daftar Token (dummy)';
-})->name('voter-tokens.index');
+    Route::get('votes', [VoteController::class, 'index'])->name('votes.index');
+    Route::get('votes/{event}', [VoteController::class, 'show'])->name('votes.show');
+});
 
 
-//
-// ====== VOTES / RESULTS ======
-//
-Route::get('/votes', function () {
-    return 'Hasil Voting (dummy)';
-})->name('votes.index');
 
+// Route Dummy
+// komentar kalau sudah buat fiturnya
+/*
+|--------------------------------------------------------------------------
+| AUTH & DASHBOARD
+|--------------------------------------------------------------------------
+*/
 
-//
-// ====== SUBSCRIPTION / PLANS ======
-//
-Route::get('/plans', function () {
-    return 'Daftar Paket (dummy)';
-})->name('plans.index');
+// Route::get('/profile', fn () => view('profile.index'))->name('profile.index');
 
-Route::get('/subscriptions', function () {
-    return 'Langgananku (dummy)';
-})->name('subscriptions.index');
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER AREA
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/payments', function () {
-    return 'Payments List (dummy)';
-})->name('payments.index');
+// EVENTS
+// Route::get('/events', fn () => 'Events Index')->name('events.index');
+// Route::get('/events/create', fn () => 'Create Event')->name('events.create');
 
+// CANDIDATES
+// Route::get('/candidates', fn() => 'Candidates Index')->name('candidates.index');
 
-//
-// ====== ADMIN MENU ======
-//
-// Route::get('/admin/users', function () {
-//     return 'Admin Users (dummy)';
-// })->name('users.index');
+// VOTER TOKENS
+// Route::get('/voter-tokens', fn() => 'Voter Tokens')->name('voter-tokens.index');
 
-Route::get('/admin/plans/management', function () {
-    return 'Manage Subscription Plans (dummy)';
-})->name('plans.management');
+// VOTES / RESULT
+// Route::get('/votes', fn() => 'Voting Result')->name('votes.index');
 
+/*
+|--------------------------------------------------------------------------
+| SUBSCRIPTION & PAYMENT
+|--------------------------------------------------------------------------
+*/
 
+// PLANS (LIST FOR CUSTOMER)
+// Route::get('/subscription-plans', fn () => 'Subscription Plans')
+//     ->name('subscription-plans.index');
+
+// USER SUBSCRIPTIONS
+Route::get('/subscriptions', fn() => 'My Subscriptions')
+    ->name('subscriptions.index');
+
+// PAYMENTS
+Route::get('/payments', fn() => 'Payments History')
+    ->name('payments.index');
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN AREA
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')->middleware('auth')->group(function () {
+
+    Route::get('/dashboard', fn() => 'Admin Dashboard')
+        ->name('admin.dashboard');
+
+    // EVENTS
+    Route::get('/events', fn() => 'All Events')
+        ->name('admin.events.index');
+
+    // CANDIDATES
+    Route::get('/candidates', fn() => 'All Candidates')
+        ->name('admin.candidates.index');
+
+    // TOKENS
+    Route::get('/tokens', fn() => 'All Tokens')
+        ->name('admin.tokens.index');
+
+    // VOTES
+    Route::get('/votes', fn() => 'Vote Recap')
+        ->name('admin.votes.index');
+
+    // PAYMENTS
+    Route::get('/payments', fn() => 'All Payments')
+        ->name('admin.payments.index');
+
+    // USER SUBSCRIPTIONS
+    Route::get('/subscriptions', fn() => 'User Subscriptions')
+        ->name('admin.subscriptions.index');
+
+    // MANAGE PLANS
+    Route::get('/plans', fn() => 'Manage Plans')
+        ->name('plans.management');
+
+    // USERS
+    Route::get('/users', fn() => 'User Management')
+        ->name('users.index');
+});
+
+/*
+|--------------------------------------------------------------------------
+| LOGOUT
+|--------------------------------------------------------------------------
+*/
+
+// Route::post('/logout', function () {
+//     auth()->logout();
+//     return redirect('/login');
+// })->name('logout');

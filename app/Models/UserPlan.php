@@ -37,9 +37,9 @@ class UserPlan extends Model
 
     public function events()
     {
-        return $this->hasMany(Event::class, 'plan_id', 'plan_id')
-            ->where('user_id', $this->user_id);
+        return $this->hasMany(Event::class, 'user_plan_id');
     }
+
 
     // HELPER: cek quota
     public function hasAvailableEvent()

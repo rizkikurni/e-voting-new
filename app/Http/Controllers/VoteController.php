@@ -2,64 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Models\Vote;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VoteController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * 1️⃣ Rekap hasil semua event milik user
+     * - Judul event
+     * - Pemenang
+     * - Perolehan kandidat
+     * - Sisa token
      */
     public function index()
     {
-        //
+        $events = Event::where('user_id', Auth::id())
+            ->with([
+                'candidates' => function ($q) {
+                    $q->withCount('votes');
+                },
+                'tokens'
+            ])
+            ->get()
+            ->map(function ($event) {
+                $winner = $event->candidates
+                    ->sortByDesc('votes_count')
+                    ->first();
+
+                return [
+                    'event'        => $event,
+                    'winner'       => $winner,
+                    'candidates'   => $event->candidates,
+                    'total_tokens' => $event->tokens->count(),
+                    'used_tokens'  => $event->tokens->where('is_used', true)->count(),
+                    'remaining'    => $event->tokens->where('is_used', false)->count(),
+                ];
+            });
+
+        return view('admin.votes.index', compact('events'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * 2️⃣ Detail hasil voting per event
      */
-    public function create()
+    public function show(Event $event)
     {
-        //
-    }
+        $this->authorizeOwner($event);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $event->load([
+            'candidates' => function ($q) {
+                $q->withCount('votes');
+            },
+            'votes.candidate',
+            'tokens'
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Vote $vote)
-    {
-        //
-    }
+        $winner = $event->candidates
+            ->sortByDesc('votes_count')
+            ->first();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Vote $vote)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Vote $vote)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Vote $vote)
-    {
-        //
+        return view('admin.votes.show', compact(
+            'event',
+            'winner'
+        ));
     }
 }

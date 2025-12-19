@@ -30,32 +30,32 @@ class UserController extends Controller
      * Save new user.
      */
     public function store(Request $request)
-{
-    $request->validate([
-        'name'     => 'required',
-        'email'    => 'required|email|unique:users',
-        'password' => 'required|min:6',
-        'role'     => 'required|in:admin,customer',
-        'photo'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-    ]);
+    {
+        $request->validate([
+            'name'     => 'required',
+            'email'    => 'required|email|unique:users',
+            'password' => 'required|min:6',
+            'role'     => 'required|in:admin,customer',
+            'photo'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
-    $photoPath = null;
+        $photoPath = null;
 
-    if ($request->hasFile('photo')) {
-        $photoPath = time() . '.' . $request->photo->extension();
-        $request->photo->move(public_path('photo'), $photoPath);
+        if ($request->hasFile('photo')) {
+            $photoPath = time() . '.' . $request->photo->extension();
+            $request->photo->move(public_path('photo'), $photoPath);
+        }
+
+        User::create([
+            'name'       => $request->name,
+            'email'      => $request->email,
+            'password'   => Hash::make($request->password),
+            'role'       => $request->role,
+            'photo_path' => $photoPath,
+        ]);
+
+        return redirect()->route('users.index')->with('success', 'User berhasil dibuat');
     }
-
-    User::create([
-        'name'       => $request->name,
-        'email'      => $request->email,
-        'password'   => Hash::make($request->password),
-        'role'       => $request->role,
-        'photo_path' => $photoPath,
-    ]);
-
-    return redirect()->route('users.index')->with('success', 'User berhasil dibuat');
-}
 
 
     /**
@@ -75,41 +75,41 @@ class UserController extends Controller
      * Update user.
      */
     public function update(Request $request, User $user)
-{
-    $request->validate([
-        'name'  => 'required',
-        'email' => "required|email|unique:users,email,$user->id",
-        'role'  => 'required|in:admin,customer',
-        'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-    ]);
+    {
+        $request->validate([
+            'name'  => 'required',
+            'email' => "required|email|unique:users,email,$user->id",
+            'role'  => 'required|in:admin,customer',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
 
-    $data = [
-        'name'  => $request->name,
-        'email' => $request->email,
-        'role'  => $request->role,
-    ];
+        $data = [
+            'name'  => $request->name,
+            'email' => $request->email,
+            'role'  => $request->role,
+        ];
 
-    if ($request->password) {
-        $request->validate(['password' => 'min:6']);
-        $data['password'] = Hash::make($request->password);
-    }
-
-    if ($request->hasFile('photo')) {
-        // hapus foto lama (opsional tapi beradab)
-        if ($user->photo_path && file_exists(public_path('photo/' . $user->photo_path))) {
-            unlink(public_path('photo/' . $user->photo_path));
+        if ($request->password) {
+            $request->validate(['password' => 'min:6']);
+            $data['password'] = Hash::make($request->password);
         }
 
-        $photoPath = time() . '.' . $request->photo->extension();
-        $request->photo->move(public_path('photo'), $photoPath);
+        if ($request->hasFile('photo')) {
+            // hapus foto lama (opsional tapi beradab)
+            if ($user->photo_path && file_exists(public_path('photo/' . $user->photo_path))) {
+                unlink(public_path('photo/' . $user->photo_path));
+            }
 
-        $data['photo_path'] = $photoPath;
+            $photoPath = time() . '.' . $request->photo->extension();
+            $request->photo->move(public_path('photo'), $photoPath);
+
+            $data['photo_path'] = $photoPath;
+        }
+
+        $user->update($data);
+
+        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui');
     }
-
-    $user->update($data);
-
-    return redirect()->route('users.index')->with('success', 'User berhasil diperbarui');
-}
 
     /**
      * Delete user.

@@ -9,7 +9,7 @@ use App\Models\VoterToken;
 use Illuminate\Database\Seeder;
 use Faker\Factory;
 
-class VotesSeeder extends Seeder
+class VoteSeeder extends Seeder
 {
     public function run(): void
     {

@@ -16,6 +16,9 @@ return new class extends Migration
 
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('plan_id')->nullable()->constrained('subscription_plans');
+            $table->foreignId('user_plan_id')
+                ->constrained('user_plans')
+                ->cascadeOnDelete();
 
             $table->string('title');
             $table->text('description')->nullable();

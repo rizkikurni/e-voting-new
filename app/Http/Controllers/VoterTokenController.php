@@ -2,64 +2,157 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Models\VoterToken;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class VoterTokenController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * 1️⃣ Tampilkan semua event + total token & terpakai
      */
     public function index()
     {
-        //
+        $events = Event::where('user_id', Auth::id())
+            ->withCount([
+                'tokens as total_tokens',
+                'tokens as used_tokens' => function ($q) {
+                    $q->where('is_used', true);
+                }
+            ])
+            ->get();
+
+        return view('admin.voter_tokens.index', compact('events'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * 2️⃣ Detail token berdasarkan event
      */
-    public function create()
+    public function show(Event $event)
     {
-        //
+        $this->authorizeOwner($event);
+
+        $tokens = $event->tokens()->latest()->get();
+
+        return view('admin.voter_tokens.show', compact('event', 'tokens'));
+    }
+
+    public function create(Event $event)
+    {
+        $this->authorizeOwner($event);
+
+        // total token sekarang
+        $currentTotal = $event->tokens()->count();
+
+        // batas maksimal dari paket
+        $maxVoters = $event->userPlan->plan->max_voters;
+
+        if ($currentTotal >= $maxVoters) {
+            abort(403, 'Jumlah token sudah mencapai batas paket.');
+        }
+
+        $remaining = $maxVoters - $currentTotal;
+
+        return view('admin.voter_tokens.create', compact(
+            'event',
+            'currentTotal',
+            'maxVoters',
+            'remaining'
+        ));
+    }
+
+
+    /**
+     * 3️⃣ Generate token awal
+     */
+    public function store(Request $request, Event $event)
+    {
+        $this->authorizeOwner($event);
+
+        $request->validate([
+            'amount' => 'required|integer|min:1',
+        ]);
+
+        $this->generateTokens($event, $request->amount);
+
+        return back()->with('success', 'Token berhasil digenerate');
     }
 
     /**
-     * Store a newly created resource in storage.
+ * Tampilkan form tambah token
+ */
+public function addView(Event $event)
+{
+    $this->authorizeOwner($event);
+
+    $currentTotal = $event->tokens()->count();
+    $maxVoters    = $event->userPlan->plan->max_voters;
+
+    if ($currentTotal >= $maxVoters) {
+        abort(403, 'Jumlah token sudah mencapai batas paket.');
+    }
+
+    $remaining = $maxVoters - $currentTotal;
+
+    return view('admin.voter_tokens.add', compact(
+        'event',
+        'currentTotal',
+        'maxVoters',
+        'remaining'
+    ));
+}
+
+    /**
+     * 4️⃣ Tambah token jika belum mencapai batas
      */
-    public function store(Request $request)
+    public function add(Request $request, Event $event)
     {
-        //
+        $this->authorizeOwner($event);
+
+        $request->validate([
+            'amount' => 'required|integer|min:1',
+        ]);
+
+        $this->generateTokens($event, $request->amount);
+
+        return back()->with('success', 'Token berhasil ditambahkan');
     }
 
     /**
-     * Display the specified resource.
+     * ==============================
+     * HELPER: Generate token AMAN
+     * ==============================
      */
-    public function show(VoterToken $voterToken)
+    protected function generateTokens(Event $event, int $amount)
     {
-        //
-    }
+        $userPlan = $event->userPlan;
+        $maxVoters = $userPlan->plan->max_voters;
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(VoterToken $voterToken)
-    {
-        //
-    }
+        $currentCount = $event->tokens()->count();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, VoterToken $voterToken)
-    {
-        //
-    }
+        if ($currentCount + $amount > $maxVoters) {
+            abort(403, 'Jumlah token melebihi batas paket.');
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(VoterToken $voterToken)
-    {
-        //
+        $length = 6;
+
+        for ($i = 0; $i < $amount; $i++) {
+
+            do {
+                $token = strtoupper(Str::random($length));
+
+                // jika kombinasi mulai penuh, naikkan panjang token
+                if (VoterToken::where('token', $token)->exists()) {
+                    $length++;
+                }
+            } while (VoterToken::where('token', $token)->exists());
+
+            VoterToken::create([
+                'event_id' => $event->id,
+                'token'    => $token,
+            ]);
+        }
     }
 }

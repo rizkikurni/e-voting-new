@@ -9,6 +9,7 @@ class Event extends Model
     protected $fillable = [
         'user_id',
         'plan_id',
+        'user_plan_id',
         'title',
         'description',
         'is_trial_event',
@@ -36,6 +37,12 @@ class Event extends Model
     {
         return $this->belongsTo(SubscriptionPlan::class);
     }
+
+    public function userPlan()
+    {
+        return $this->belongsTo(UserPlan::class);
+    }
+
 
     public function candidates()
     {
