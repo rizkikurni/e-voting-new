@@ -59,7 +59,7 @@
         <li class="menu-label">Subscription</li>
 
         <li>
-            <a href="">
+            <a href="{{ route('plans.index') }}">
                 <div class="parent-icon"><i class="bi bi-gem"></i></div>
                 <div class="menu-title">Paket</div>
             </a>

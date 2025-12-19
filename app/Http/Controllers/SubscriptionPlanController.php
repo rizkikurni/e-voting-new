@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SubscriptionPlan;
+use App\Models\UserPlan;
 use Illuminate\Http\Request;
+use App\Models\SubscriptionPlan;
+use Illuminate\Support\Facades\Auth;
 
 class SubscriptionPlanController extends Controller
 {
@@ -96,5 +98,75 @@ class SubscriptionPlanController extends Controller
         return redirect()
             ->route('subscription-plans.index')
             ->with('success', 'Subscription plan berhasil dihapus');
+    }
+
+    public function subscriptions()
+    {
+        $userPlans = UserPlan::with('plan')
+            ->where('user_id', Auth::id())
+            ->where('payment_status', 'paid')
+            ->orderByDesc('purchased_at')
+            ->get()
+            ->map(function ($userPlan) {
+
+                $maxEvent   = $userPlan->plan->max_event;
+                $usedEvent  = $userPlan->used_event;
+                $remaining  = max($maxEvent - $usedEvent, 0);
+                $percentage = $maxEvent > 0
+                    ? round(($usedEvent / $maxEvent) * 100)
+                    : 0;
+
+                return [
+                    'id'            => $userPlan->id,
+                    'plan_name'     => $userPlan->plan->name,
+                    'max_event'     => $maxEvent,
+                    'used_event'    => $usedEvent,
+                    'remaining'     => $remaining,
+                    'percentage'    => $percentage,
+                    'purchased_at'  => $userPlan->purchased_at,
+                    'is_available'  => $remaining > 0,
+                ];
+            });
+
+        return view('admin.subscriptions.index', compact('userPlans'));
+    }
+
+    public function plans()
+    {
+        $user = Auth::user();
+
+        $plans = SubscriptionPlan::with(['userPlans' => function ($q) use ($user) {
+            $q->where('user_id', $user->id)
+                ->where('payment_status', 'paid');
+        }])->get();
+
+        $plans = $plans->map(function ($plan) {
+
+            $count = $plan->userPlans->count();
+            $totalQuota = $count * $plan->max_event;
+            $used = $plan->userPlans->sum('used_event');
+            $remaining = max($totalQuota - $used, 0);
+
+            return [
+                'id' => $plan->id,
+                'name' => $plan->name,
+                'price' => $plan->price,
+                'features' => $plan->features,
+                'max_event' => $plan->max_event,
+                'max_candidates' => $plan->max_candidates,
+                'max_voters' => $plan->max_voters,
+
+                // STACK INFO
+                'owned_count' => $count,
+                'total_quota' => $totalQuota,
+                'used_event' => $used,
+                'remaining' => $remaining,
+                'percentage' => $totalQuota > 0
+                    ? round(($used / $totalQuota) * 100)
+                    : 0,
+            ];
+        });
+
+        return view('admin.subscriptions.plans', compact('plans'));
     }
 }

@@ -19,11 +19,13 @@ class Payment extends Model
         'fraud_status',
         'transaction_time',
         'payload_response',
+        'paid_at',
     ];
 
     protected $casts = [
         'payload_response' => 'array',
         'transaction_time' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     // RELATIONS
@@ -40,5 +42,15 @@ class Payment extends Model
     public function userPlan()
     {
         return $this->hasOne(UserPlan::class);
+    }
+
+    public function isPaid()
+    {
+        return in_array($this->transaction_status, ['settlement', 'capture']);
+    }
+
+    public function isPending()
+    {
+        return $this->transaction_status === 'pending';
     }
 }
