@@ -77,7 +77,7 @@ class VoterTokenController extends Controller
 
         $this->generateTokens($event, $request->amount);
 
-        return back()->with('success', 'Token berhasil digenerate');
+        return redirect()->route('voter-tokens.index')->with('success', 'Token berhasil digenerate');
     }
 
     /**

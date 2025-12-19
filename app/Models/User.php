@@ -96,4 +96,13 @@ class User extends Authenticatable
             ->select('user_plans.*')
             ->first();
     }
+
+    public function availablePlans()
+    {
+        return $this->userPlans()
+            ->where('payment_status', 'paid')
+            ->whereHas('plan', function ($q) {
+                $q->whereColumn('user_plans.used_event', '<', 'subscription_plans.max_event');
+            });
+    }
 }

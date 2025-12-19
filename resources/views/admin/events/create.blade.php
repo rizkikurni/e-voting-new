@@ -8,6 +8,8 @@
             <h6 class="mb-0 text-uppercase">Tambah Event</h6>
             <hr />
 
+        <x-alert/>
+
             <div class="card">
                 <div class="card-body">
                     <div class="border p-4 rounded">
@@ -20,18 +22,32 @@
                         <form action="{{ route('events.store') }}" method="POST">
                             @csrf
 
-                            {{-- INFO PAKET --}}
-                            <div class="alert alert-info">
-                                <strong>Paket Aktif:</strong> {{ $userPlan->plan->name }} <br>
-                                <small>
-                                    Sisa Event:
-                                    {{ $userPlan->plan->max_event - $userPlan->used_event }}
-                                </small>
-                            </div>
+                            {{-- PILIH PAKET --}}
+                            <div class="row mb-3">
+                                <label class="col-sm-3 col-form-label">Pilih Paket</label>
+                                <div class="col-sm-9">
+                                    <select name="user_plan_id"
+                                            class="form-select @error('user_plan_id') is-invalid @enderror"
+                                            required>
+                                        <option value="">-- Pilih Paket --</option>
 
-                            {{-- Hidden --}}
-                            <input type="hidden" name="user_plan_id" value="{{ $userPlan->id }}">
-                            <input type="hidden" name="plan_id" value="{{ $userPlan->plan_id }}">
+                                        @foreach ($userPlans as $plan)
+                                            @php
+                                                $sisa = $plan->plan->max_event - $plan->used_event;
+                                            @endphp
+                                            <option value="{{ $plan->id }}"
+                                                {{ old('user_plan_id') == $plan->id ? 'selected' : '' }}>
+                                                {{ $plan->plan->name }}
+                                                (Sisa {{ $sisa }} event)
+                                            </option>
+                                        @endforeach
+                                    </select>
+
+                                    @error('user_plan_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
 
                             {{-- Judul --}}
                             <div class="row mb-3">
@@ -89,7 +105,6 @@
                                     @enderror
                                 </div>
                             </div>
-
 
                             {{-- SUBMIT --}}
                             <div class="row">

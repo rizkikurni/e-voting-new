@@ -7,13 +7,14 @@
         <h6 class="mb-0 text-uppercase fw-bold">Rekap Hasil Voting</h6>
         <small class="text-muted">Ringkasan hasil voting seluruh event</small>
     </div>
+            <x-alert/>
 
     <div class="card">
         <div class="card-body">
 
             <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light text-center">
+                <table class="table table-bordered table-striped align-middle" id="example2">
+                        <thead class="table-primary">
                         <tr>
                             <th>Event</th>
                             <th>Pemenang</th>
@@ -50,14 +51,21 @@
                                 </td>
 
                                 {{-- PEROLEHAN --}}
-                                <td>
-                                    @foreach ($item['candidates'] as $candidate)
-                                        <div class="d-flex justify-content-between">
-                                            <span>{{ $candidate->name }}</span>
-                                            <strong>{{ $candidate->votes_count }}</strong>
-                                        </div>
-                                    @endforeach
-                                </td>
+<td>
+    @foreach ($item['candidates']->take(3) as $candidate)
+        <div class="d-flex justify-content-between">
+            <span>{{ $candidate->name }}</span>
+            <strong>{{ $candidate->votes_count }}</strong>
+        </div>
+    @endforeach
+
+    @if ($item['candidates']->count() > 3)
+        <div class="text-muted small fst-italic">
+            +{{ $item['candidates']->count() - 3 }} kandidat lainnya…
+        </div>
+    @endif
+</td>
+
 
                                 {{-- TOKEN --}}
                                 <td class="text-center">

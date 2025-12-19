@@ -3,64 +3,82 @@
 @section('content')
     <main class="page-content">
 
-        <h6 class="mb-3 text-uppercase fw-bold">Manajemen Kandidat</h6>
-
-        @foreach ($events as $event)
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <strong>{{ $event->title }}</strong>
-                    <span class="badge bg-secondary">
-                        {{ $event->candidates->count() }} Kandidat
-                    </span>
-                    <a href="{{ route('events.candidates.index', $event->id) }}">detail</a>
-                    <a href="{{ route('events.candidates.create', $event->id) }}">tambah</a>
-                </div>
-
-                <div class="card-body">
-
-                    {{-- LIST KANDIDAT --}}
-                    @forelse ($event->candidates as $candidate)
-                         <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
-
-                            <div>
-                                <strong>{{ $candidate->name }}</strong>
-                                <div class="text-muted small">
-                                    {{ $candidate->description }}
-                                </div>
-                            </div>
-
-                            <div class="d-flex gap-2">
-                                {{-- EDIT --}}
-                                <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
-                                    data-bs-target="#editCandidate{{ $candidate->id }}">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </button>
-
-                                {{-- DELETE --}}
-                                {{-- <form action="{{ route('candidates.destroy', $candidate->id) }}" method="POST"
-                                    onsubmit="return confirm('Hapus kandidat ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-outline-danger btn-sm">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
-                                </form> --}}
-                            </div>
-                        </div>
-
-                        {{-- MODAL EDIT --}}
-                        {{-- @include('admin.candidates.partials.edit', ['candidate' => $candidate]) --}}
-                    @empty
-                        <div class="text-muted">Belum ada kandidat</div>
-                    @endforelse
-
-                    {{-- TAMBAH KANDIDAT --}}
-                    <hr>
-                    {{-- @include('admin.candidates.partials.create', ['event' => $event]) --}}
-
-                </div>
+        {{-- HEADER --}}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h6 class="mb-0 text-uppercase fw-bold">Manajemen Kandidat</h6>
+                <small class="text-muted">Kelola kandidat berdasarkan event</small>
             </div>
-        @endforeach
+        </div>
+
+        {{-- ALERT --}}
+<x-alert></x-alert>
+
+        <div class="card">
+            <div class="card-body">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle" id="example2">
+                        <thead class="table-primary">
+                            <tr class="text-center">
+                                <th>Event</th>
+                                <th width="180">Jumlah Kandidat</th>
+                                <th width="200">Aksi</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @forelse ($events as $event)
+                                <tr>
+                                    {{-- EVENT --}}
+                                    <td>
+                                        <strong>{{ $event->title }}</strong>
+                                    </td>
+
+                                    {{-- JUMLAH KANDIDAT --}}
+                                    <td class="text-center">
+                                        <span class="badge bg-info">
+                                            {{ $event->candidates->count() }} Kandidat
+                                        </span>
+                                    </td>
+
+                                    {{-- AKSI --}}
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+
+                                            {{-- DETAIL --}}
+                                            <a href="{{ route('events.candidates.index', $event->id) }}"
+                                                class="btn btn-outline-primary btn-sm"
+                                                title="Detail Kandidat">
+                                                <i class="bi bi-eye-fill"></i>
+                                                Detail
+                                            </a>
+
+                                            {{-- TAMBAH --}}
+                                            <a href="{{ route('events.candidates.create', $event->id) }}"
+                                                class="btn btn-outline-success btn-sm"
+                                                title="Tambah Kandidat">
+                                                <i class="bi bi-plus-circle"></i>
+                                                Tambah
+                                            </a>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">
+                                        Belum ada event
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+        </div>
 
     </main>
 @endsection
