@@ -21,7 +21,7 @@ Route::get('/vote/{event}', [HomeController::class, 'vote'])
 Route::post('/vote/{event}', [HomeController::class, 'voteStore'])
     ->name('voting.store');
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
 
 
 // Auth pages
@@ -37,12 +37,16 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 // khusus admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
+    Route::get('/dashboard-admin', [DashboardController::class, 'admin'])->name('admin.dashboard');
+
+
     Route::resource('users', UserController::class);
 
     Route::resource('subscription-plans', SubscriptionPlanController::class);
 });
 // khusus customer / user
 Route::middleware(['auth', 'role:customer'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/checkout/{plan}', [CheckoutController::class, 'checkout'])
         ->name('checkout');
@@ -53,8 +57,21 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/payment/pending/{orderId}', [PaymentController::class, 'pending'])
         ->name('payment.pending');
 
+    // TAMBAHKAN ROUTE INI
+    Route::get('/payment/pay/{orderId}', [PaymentController::class, 'pay'])
+        ->name('payment.pay');
+
     Route::get('/payment/check/{orderId}', [PaymentController::class, 'checkStatus'])
         ->name('payment.check');
+
+    Route::get('/payments', [PaymentController::class, 'index'])
+        ->name('payments.index');
+
+    Route::get('/my-subscriptions', [SubscriptionPlanController::class, 'subscriptions'])
+        ->name('subscriptions.index');
+
+    Route::get('/plans', [SubscriptionPlanController::class, 'plans'])
+        ->name('plans.index');
 });
 
 Route::middleware(['auth', 'role:customer,admin'])->group(function () {
@@ -65,10 +82,10 @@ Route::middleware(['auth', 'role:customer,admin'])->group(function () {
     Route::post('events/{event}/publish', [EventController::class, 'publish'])->name('events.publish');
     Route::post('events/{event}/lock', [EventController::class, 'lock'])->name('events.lock');
 
-Route::middleware(['auth', 'role:customer,admin'])->group(function () {
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
-    Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
-});
+    Route::middleware(['auth', 'role:customer,admin'])->group(function () {
+        Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
+        Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+    });
 
 
     Route::get('/candidates', [CandidateController::class, 'all'])->name('candidates.index');
@@ -140,12 +157,12 @@ Route::middleware(['auth', 'role:customer,admin'])->group(function () {
 //     ->name('subscription-plans.index');
 
 // USER SUBSCRIPTIONS
-Route::get('/subscriptions', fn() => 'My Subscriptions')
-    ->name('subscriptions.index');
+// Route::get('/subscriptions', fn() => 'My Subscriptions')
+//     ->name('subscriptions.index');
 
 // PAYMENTS
-Route::get('/payments', fn() => 'Payments History')
-    ->name('payments.index');
+// Route::get('/payments', fn() => 'Payments History')
+//     ->name('payments.index');
 
 /*
 |--------------------------------------------------------------------------

@@ -60,6 +60,13 @@ class User extends Authenticatable
         return $this->plans()->where('payment_status', 'paid');
     }
 
+    public function userPlans()
+    {
+        return $this->hasMany(UserPlan::class);
+    }
+
+
+
     public function events()
     {
         return $this->hasMany(Event::class);

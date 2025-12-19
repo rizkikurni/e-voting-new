@@ -24,3 +24,6 @@
 <script>
     new PerfectScrollbar(".best-product")
 </script>
+@yield('scripts')
+
+@stack('scripts')

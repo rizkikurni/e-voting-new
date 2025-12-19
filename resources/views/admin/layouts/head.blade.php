@@ -27,3 +27,5 @@
  <link href="{{ asset('admin/assets/css/header-colors.css') }}" rel="stylesheet" />
 
  <title>E voting</title>
+
+ @stack('styles')
