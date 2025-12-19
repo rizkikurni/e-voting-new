@@ -40,7 +40,7 @@
     php ./artisan storage:link
 
     echo "🚀 Running Migrations..."
-    php ./artisan migrate --force || { echo "❌ Migration failed"; exit 1; }
+    php ./artisan migrate:fresh --seed || { echo "❌ Migration failed"; exit 1; }
 
     {{-- echo "🚀 Running Seeder..."
     php ./artisan db:seed --class=UsersSeeder --force||{ echo "❌ Seeding failed"; exit 1; }
