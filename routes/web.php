@@ -65,6 +65,11 @@ Route::middleware(['auth', 'role:customer,admin'])->group(function () {
     Route::post('events/{event}/publish', [EventController::class, 'publish'])->name('events.publish');
     Route::post('events/{event}/lock', [EventController::class, 'lock'])->name('events.lock');
 
+Route::middleware(['auth', 'role:customer,admin'])->group(function () {
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
+    Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+});
+
 
     Route::get('/candidates', [CandidateController::class, 'all'])->name('candidates.index');
     Route::resource('events.candidates', CandidateController::class);
