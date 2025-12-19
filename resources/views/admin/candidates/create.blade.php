@@ -7,6 +7,8 @@
     <small class="text-muted">{{ $event->title }}</small>
     <hr />
 
+    <x-alert/>
+
     <div class="card">
         <div class="card-body">
             <form action="{{ route('events.candidates.store', $event->id) }}"

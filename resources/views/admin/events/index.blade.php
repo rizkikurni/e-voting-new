@@ -17,15 +17,17 @@
             </a>
         </div>
 
+        <x-alert />
+
         <div class="card">
             <div class="card-body">
 
                 <div class="table-responsive">
-                    <table class="table table-bordered align-middle">
-                        <thead class="table-light">
+                    <table class="table table-bordered table-striped align-middle" id="example2">
+                        <thead class="table-primary">
                             <tr class="text-center">
                                 <th>Judul</th>
-                                <th>Pemilik</th>
+                                <th>Link Event</th>
                                 <th>Paket</th>
                                 <th>Waktu</th>
                                 <th>Status</th>
@@ -44,8 +46,11 @@
                                     </td>
 
                                     <td class="text-center">
-                                        {{ $event->owner->name ?? '-' }}
+                                        <a href="{{ route('voting.show', $event->id) }}" target="_blank">
+                                            {{ route('voting.show', $event->id) }}
+                                        </a>
                                     </td>
+
 
                                     <td class="text-center">
                                         {{ $event->userPlan?->plan?->name ?? '-' }}

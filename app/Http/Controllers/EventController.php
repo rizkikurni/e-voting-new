@@ -27,57 +27,74 @@ class EventController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-    {
-        // ambil 1 user_plan yang masih punya kuota
-        $userPlan = Auth::user()->getAvailablePlan();
+{
+    $user = Auth::user();
 
-        if (!$userPlan) {
-            abort(403, 'Tidak ada paket aktif dengan sisa kuota event.');
-        }
+    // Ambil semua user_plan milik user yang:
+    // - status paid
+    // - masih punya sisa kuota event
+    $userPlans = $user->plans()
+        ->where('payment_status', 'paid')
+        ->get()
+        ->filter(fn ($plan) => $plan->hasAvailableEvent());
 
-        return view('admin.events.create', compact('userPlan'));
+    if ($userPlans->isEmpty()) {
+        abort(403, 'Tidak ada paket aktif dengan sisa kuota event.');
     }
+
+    return view('admin.events.create', compact('userPlans'));
+}
+
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'start_time'  => 'required|date',
-            'end_time'    => 'required|date|after:start_time',
+{
+    $request->validate([
+        'user_plan_id' => 'required|exists:user_plans,id',
+        'title'        => 'required|string|max:255',
+        'description'  => 'nullable|string',
+        'start_time'   => 'required|date',
+        'end_time'     => 'required|date|after:start_time',
+    ]);
+
+    $user = Auth::user();
+
+    // Ambil user_plan yang dipilih, pastikan:
+    // - milik user
+    // - status paid
+    $userPlan = UserPlan::where('id', $request->user_plan_id)
+        ->where('user_id', $user->id)
+        ->where('payment_status', 'paid')
+        ->firstOrFail();
+
+    // Cek kuota
+    if (! $userPlan->hasAvailableEvent()) {
+        abort(403, 'Kuota event pada paket ini sudah habis.');
+    }
+
+    DB::transaction(function () use ($request, $user, $userPlan) {
+
+        Event::create([
+            'user_id'        => $user->id,
+            'user_plan_id'   => $userPlan->id,
+            'plan_id'        => $userPlan->plan_id,
+            'title'          => $request->title,
+            'description'    => $request->description,
+            'start_time'     => $request->start_time,
+            'end_time'       => $request->end_time,
+            'is_trial_event' => false,
         ]);
 
-        $user = Auth::user();
-        $userPlan = $user->getAvailablePlan();
+        // Kurangi kuota
+        $userPlan->increment('used_event');
+    });
 
-        if (!$userPlan || !$userPlan->hasAvailableEvent()) {
-            abort(403, 'Kuota event habis.');
-        }
-
-        DB::transaction(function () use ($request, $user, $userPlan) {
-
-            Event::create([
-                'user_id'       => $user->id,
-                'user_plan_id'  => $userPlan->id,
-                'plan_id'       => $userPlan->plan_id, // redundant tapi konsisten
-                'title'         => $request->title,
-                'description'   => $request->description,
-                'start_time'    => $request->start_time,
-                'end_time'      => $request->end_time,
-                'is_trial_event' => false,
-            ]);
-
-            // naikkan pemakaian kuota
-            $userPlan->increment('used_event');
-        });
-
-        return redirect()
-            ->route('events.index')
-            ->with('success', 'Event berhasil dibuat.');
-    }
+    return redirect()
+        ->route('events.index')
+        ->with('success', 'Event berhasil dibuat.');
+}
 
     /**
      * Display the specified resource.

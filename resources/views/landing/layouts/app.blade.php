@@ -23,6 +23,7 @@
 
     <!-- JS here -->
     @include('landing.layouts.script')
+    @yield('script')
 
 </body>
 

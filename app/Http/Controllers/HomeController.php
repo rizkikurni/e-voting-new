@@ -19,85 +19,126 @@ class HomeController extends Controller
         return view('landing.index', compact('plans'));
     }
 
-     public function vote(Event $eventId)
+    /**
+     * Tampilkan halaman voting
+     */
+    public function vote(Event $event)
     {
-        $event = Event::with(['candidates.votes', 'tokens'])
-            ->where('is_published', true)
-            ->findOrFail($eventId);
+        $now = now();
 
-        // status waktu event
-        $isRunning = now()->between($event->start_time, $event->end_time);
+        $isStarted = $now->greaterThanOrEqualTo($event->start_time);
+        $isEnded   = $now->greaterThan($event->end_time);
+        $isRunning = $isStarted && !$isEnded;
 
-        // tentukan pemenang (hanya jika event selesai)
+
+        // Ambil kandidat
+        $candidates = $event->candidates;
+
+        // Hitung pemenang (jika event selesai)
         $winner = null;
-        if (now()->greaterThan($event->end_time)) {
-            $winner = $event->candidates
-                ->sortByDesc(fn ($c) => $c->votes->count())
+        if ($now->gt($event->end_time)) {
+            $winner = $event->candidates()
+                ->withCount(['votes'])
+                ->orderByDesc('votes_count')
                 ->first();
         }
+        // dd($event,$candidates,$winner,$isRunning);
+        // dd($isRunning,$isStarted,$isEnded);
+        // dd($event->start_time, $event->end_time);
+        // dd($now);
 
         return view('landing.vote', [
             'event'      => $event,
-            'candidates' => $event->candidates,
-            'winner'     => $winner,      // null kalau belum selesai
-            'isRunning'  => $isRunning,   // true kalau voting aktif
+            'candidates' => $candidates,
+            'winner'     => $winner,
+            'isRunning'  => $isRunning,
+            'isStarted'  => $isStarted,
+            'isEnded'  => $isEnded,
         ]);
     }
 
     /**
-     * Simpan vote dari pemilih
+     * Proses submit vote
      */
-    public function voteStore(Request $request, $eventId)
+    public function voteStore(Request $request, Event $event)
     {
-       $event = Event::with('tokens')->findOrFail($eventId);
-
-        // validasi waktu
-        if (! now()->between($event->start_time, $event->end_time)) {
-            return back()->withErrors([
-                'token' => 'Voting belum dimulai atau sudah berakhir.'
-            ]);
-        }
-
         $request->validate([
             'candidate_id' => 'required|exists:candidates,id',
             'token'        => 'required|string',
         ]);
 
-        DB::transaction(function () use ($request, $event) {
+        $candidate = Candidate::where('id', $request->candidate_id)
+            ->where('event_id', $event->id)
+            ->firstOrFail();
 
-            // cari token
-            $token = VoterToken::where('event_id', $event->id)
-                ->where('token', $request->token)
-                ->where('is_used', false)
-                ->lockForUpdate()
-                ->first();
+        $token = VoterToken::where('token', $request->token)
+            ->where('event_id', $event->id)
+            ->first();
 
-            if (! $token) {
-                abort(422, 'Token tidak valid atau sudah digunakan.');
-            }
+        if (!$token) {
+            return back()->withErrors(['token' => 'Token tidak valid.']);
+        }
 
-            // simpan vote
-            Vote::create([
-                'event_id'     => $event->id,
-                'candidate_id' => $request->candidate_id,
-                'token_id'     => $token->id,
-                'voted_at'     => now(),
-            ]);
+        if ($token->is_used) {
+            return back()->withErrors(['token' => 'Token sudah digunakan.']);
+        }
 
-            // tandai token terpakai
-            $token->update(['is_used' => true]);
-        });
+        $now = Carbon::now();
+        if (!$now->between($event->start_time, $event->end_time)) {
+            return back()->withErrors(['event' => 'Voting belum dimulai atau sudah berakhir.']);
+        }
 
-        return back()->with('success', 'Terima kasih, suara Anda berhasil dikirim.');
+        // Simpan vote
+        Vote::create([
+            'event_id'     => $event->id,
+            'candidate_id' => $candidate->id,
+            'token_id'     => $token->id,
+            'voted_at'     => $now,
+        ]);
+
+        // Tandai token sudah digunakan
+        $token->update(['is_used' => true]);
+
+        return redirect()->back()->with('success', 'Suara berhasil dikirim.');
     }
 
 
-    // public function vote()
-    // {
-    //     return view('landing.vote');
-    // }
-    public function voteResult()
+    public function voteResult(Event $event)
     {
-        return view('landing.vote-result');
+         // Ambil semua kandidat + jumlah vote
+        $candidates = Candidate::withCount([
+                'votes as votes_count' => function ($q) use ($event) {
+                    $q->where('event_id', $event->id);
+                }
+            ])
+            ->where('event_id', $event->id)
+            ->orderByDesc('votes_count')
+            ->get();
+
+        // Total suara
+        $totalVotes = $candidates->sum('votes_count');
+
+        // Hitung persentase per kandidat
+        $results = $candidates->map(function ($candidate) use ($totalVotes) {
+            $candidate->percentage = $totalVotes > 0
+                ? round(($candidate->votes_count / $totalVotes) * 100, 1)
+                : 0;
+
+            return $candidate;
+        });
+
+        // Tentukan pemenang (jika voting sudah selesai)
+        $winner = null;
+        if (now()->greaterThan($event->end_time) && $results->count() > 0) {
+            $winner = $results->first(); // karena sudah orderByDesc
+        }
+
+        return view('landing.vote-result', [
+            'event'       => $event,
+            'results'     => $results,
+            'totalVotes'  => $totalVotes,
+            'winner'      => $winner,
+        ]);
+
     }
 }

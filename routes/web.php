@@ -13,13 +13,13 @@ use App\Http\Controllers\VoteController;
 use App\Http\Controllers\VoterTokenController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-// Route::get('/vote', [HomeController::class, 'vote'])->name('vote');
-// Route::get('/vote-result', [HomeController::class, 'voteResult'])->name('vote.result');
-Route::get('/vote/{event}', [HomeController::class, 'vote'])
-    ->name('voting.show');
 
+Route::get('/vote/{event}', [HomeController::class, 'vote'])
+->name('voting.show');
 Route::post('/vote/{event}', [HomeController::class, 'voteStore'])
-    ->name('voting.store');
+->name('voting.store');
+
+Route::get('/vote-result/{event}', [HomeController::class, 'voteResult'])->name('voting.result');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

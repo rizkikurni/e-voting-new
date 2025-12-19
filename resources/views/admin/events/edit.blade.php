@@ -7,6 +7,8 @@
         <div class="col-xl-9 mx-auto">
             <h6 class="mb-0 text-uppercase">Edit Event</h6>
             <hr />
+        <x-alert/>
+
 
             <div class="card">
                 <div class="card-body">

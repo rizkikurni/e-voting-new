@@ -3,28 +3,65 @@
 @section('content')
 <main class="page-content">
 
-    <div class="d-flex justify-content-between mb-3">
-        <h6 class="mb-0 text-uppercase">Detail Kandidat</h6>
+    {{-- HEADER --}}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h6 class="mb-0 text-uppercase fw-bold">Detail Kandidat</h6>
+            <small class="text-muted">Informasi lengkap kandidat</small>
+        </div>
+
         <a href="{{ route('events.candidates.index', $event->id) }}"
-           class="btn btn-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Kembali
+           class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+            <i class="bi bi-arrow-left"></i>
+            Kembali
         </a>
     </div>
 
-    <div class="card">
-        <div class="card-body text-center">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
 
-            @if ($candidate->photo)
-                <img src="{{ asset('storage/' . $candidate->photo) }}"
-                     class="rounded mb-3" width="120">
-            @endif
+            <div class="card shadow-sm">
+                <div class="card-body text-center p-4">
 
-            <h5>{{ $candidate->name }}</h5>
-            <p class="text-muted">{{ $candidate->description ?? '-' }}</p>
+                    {{-- FOTO --}}
+                    <div class="mb-3">
+                        <img src="{{ $candidate->photo
+                                ? asset('storage/'.$candidate->photo)
+                                : asset('landing/img/speaker_placeholder.png') }}"
+                             class="rounded-circle border"
+                             style="width:140px; height:140px; object-fit:cover;">
+                    </div>
 
-            <span class="badge bg-primary">
-                {{ $candidate->votes_count ?? $candidate->votes->count() }} Suara
-            </span>
+                    {{-- NAMA --}}
+                    <h4 class="fw-bold mb-1">
+                        {{ $candidate->name }}
+                    </h4>
+
+                    {{-- DESKRIPSI --}}
+                    <p class="text-muted mb-3">
+                        {{ $candidate->description ?? 'Tidak ada deskripsi' }}
+                    </p>
+
+                    <hr>
+
+                    {{-- STATISTIK --}}
+                    <div class="row text-center">
+
+                        <div class="col-12">
+                            <div class="p-3 rounded bg-light">
+                                <h3 class="fw-bold mb-0 text-primary">
+                                    {{ $candidate->votes_count ?? $candidate->votes->count() }}
+                                </h3>
+                                <small class="text-muted">
+                                    Total Suara
+                                </small>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
 
         </div>
     </div>
