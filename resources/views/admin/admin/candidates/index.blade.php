@@ -64,7 +64,7 @@
                                         </small>
                                     </td>
 
-                                    {{-- STATUS EVENT --}}
+                                    {{-- STATUS EVENT--}}
                                     <td>
                                         @if ($candidate->event?->is_published)
                                             <span class="badge bg-success">Published</span>
