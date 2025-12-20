@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Str;
 use App\Models\Event;
 use App\Models\Candidate;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
@@ -317,7 +317,7 @@ class CandidateController extends Controller
             'allCandidates'
         ));
 
-        $filename = 'kandidat-' . \Str::slug($candidate->name) . '-' . date('YmdHis') . '.pdf';
+        $filename = 'kandidat-' . Str::slug($candidate->name) . '-' . date('YmdHis') . '.pdf';
 
         return $pdf->download($filename);
     }

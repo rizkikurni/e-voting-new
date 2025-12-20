@@ -129,6 +129,10 @@ class UserController extends Controller
      */
     public function showLoginForm()
     {
+        if (Auth::check()) {
+            return $this->redirectByRole(Auth::user());
+        }
+
         return view('auth.login');
     }
 
@@ -251,5 +255,14 @@ class UserController extends Controller
 
 
         return back()->with('success', 'Profil berhasil diperbarui');
+    }
+
+    private function redirectByRole($user)
+    {
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('dashboard'); // customer
     }
 }
