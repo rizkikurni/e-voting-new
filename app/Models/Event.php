@@ -3,9 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Event extends Model
 {
+    use HasUuids;
+
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
         'user_id',
         'plan_id',
@@ -43,7 +49,6 @@ class Event extends Model
         return $this->belongsTo(UserPlan::class);
     }
 
-
     public function candidates()
     {
         return $this->hasMany(Candidate::class);
@@ -59,7 +64,6 @@ class Event extends Model
         return $this->hasMany(Vote::class);
     }
 
-    // HELPER
     public function isEditable()
     {
         return !$this->is_locked && !$this->is_published;

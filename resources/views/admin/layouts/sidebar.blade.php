@@ -99,35 +99,35 @@
             </li>
 
             <li>
-                <a href="{{ route('admin.candidates.index') }}">
+                <a href="{{ route('candidates.admin.index') }}">
                     <div class="parent-icon"><i class="bi bi-people-fill"></i></div>
                     <div class="menu-title">Semua Kandidat</div>
                 </a>
             </li>
 
             <li>
-                <a href="{{ route('admin.tokens.index') }}">
+                <a href="">
                     <div class="parent-icon"><i class="bi bi-key-fill"></i></div>
                     <div class="menu-title">Semua Token</div>
                 </a>
             </li>
 
             <li>
-                <a href="{{ route('admin.votes.index') }}">
+                <a href="">
                     <div class="parent-icon"><i class="bi bi-bar-chart-line-fill"></i></div>
                     <div class="menu-title">Rekap Voting</div>
                 </a>
             </li>
 
             <li>
-                <a href="{{ route('admin.payments.index') }}">
+                <a href="">
                     <div class="parent-icon"><i class="bi bi-cash-coin"></i></div>
                     <div class="menu-title">Pembayaran (Midtrans)</div>
                 </a>
             </li>
 
             <li>
-                <a href="{{ route('admin.subscriptions.index') }}">
+                <a href="">
                     <div class="parent-icon"><i class="bi bi-journal-check"></i></div>
                     <div class="menu-title">Langganan User</div>
                 </a>

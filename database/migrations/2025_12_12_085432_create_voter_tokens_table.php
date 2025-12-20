@@ -14,7 +14,11 @@ return new class extends Migration
         Schema::create('voter_tokens', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('event_id')->constrained()->onDelete('cascade');
+            $table->uuid('event_id');
+            $table->foreign('event_id')
+                ->references('id')
+                ->on('events')
+                ->cascadeOnDelete();
 
             $table->string('token', 6)->unique(); // kode unik 6 digit
             $table->boolean('is_used')->default(false);

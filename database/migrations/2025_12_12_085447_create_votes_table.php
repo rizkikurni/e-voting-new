@@ -11,14 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('votes', function (Blueprint $table) {
+        Schema::create('votes', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('event_id')->constrained()->onDelete('cascade');
+            $table->uuid('event_id');
+            $table->foreign('event_id')
+                ->references('id')
+                ->on('events')
+                ->cascadeOnDelete();
             $table->foreignId('candidate_id')->constrained()->onDelete('cascade');
 
             $table->foreignId('token_id')->nullable()->constrained('voter_tokens')
-                  ->nullOnDelete();
+                ->nullOnDelete();
 
             $table->timestamp('voted_at');
 
