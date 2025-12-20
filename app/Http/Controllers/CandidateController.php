@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use Str;
 use App\Models\Event;
 use App\Models\Candidate;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 
 class CandidateController extends Controller
 {
 
-     /**
+    /**
      * Menampilkan semua event + kandidatnya
      */
     public function all()
@@ -180,5 +182,143 @@ class CandidateController extends Controller
         $candidate->delete();
 
         return back()->with('success', 'Kandidat berhasil dihapus');
+    }
+
+    public function index_admin()
+    {
+        $candidates = Candidate::with([
+            'event:id,user_id,title,start_time,end_time,is_published',
+            'event.owner:id,name,email',
+        ])
+            ->withCount('votes')
+            ->latest()
+            ->get();
+
+        return view('admin.admin.candidates.index', compact('candidates'));
+    }
+
+
+    /**
+     * ADMIN - Detail kandidat
+     */
+    public function show_admin(Candidate $candidate)
+    {
+        $candidate->load([
+            'event:id,user_id,title,description,start_time,end_time,is_published',
+            'event.owner:id,name,email',
+            'votes',
+        ]);
+
+        $now = now();
+
+        $isEnded = $candidate->event->end_time
+            && $now->greaterThan($candidate->event->end_time);
+
+        $totalVotes = $candidate->event->votes()->count();
+        $candidateVotes = $candidate->votes()->count();
+
+        $winner = $candidate->event
+            ->candidates()
+            ->withCount('votes')
+            ->orderByDesc('votes_count')
+            ->first();
+
+        $isWinner = $winner && $winner->id === $candidate->id;
+
+        $percentage = $totalVotes > 0
+            ? round(($candidateVotes / $totalVotes) * 100, 2)
+            : 0;
+
+        // Data untuk grafik perbandingan semua kandidat
+        $allCandidates = $candidate->event
+            ->candidates()
+            ->withCount('votes')
+            ->get();
+
+        $sortedCandidates = $allCandidates
+            ->sortByDesc('votes_count')
+            ->values();
+
+        // Ambil suara kandidat ini
+        $currentVotes = $candidateVotes;
+
+        // Kandidat dengan suara lebih besar
+        $higherVotesCount = $sortedCandidates
+            ->where('votes_count', '>', $currentVotes)
+            ->count();
+
+        // Ranking = jumlah kandidat dengan suara lebih besar + 1
+        $rank = $higherVotesCount + 1;
+
+        // Cek draw (suara sama, tapi bukan dirinya sendiri)
+        $drawCandidates = $sortedCandidates
+            ->where('votes_count', $currentVotes)
+            ->where('id', '!=', $candidate->id)
+            ->values();
+
+        $isDraw = $drawCandidates->count() > 0;
+
+
+        return view('admin.admin.candidates.show', compact(
+            'candidate',
+            'candidateVotes',
+            'totalVotes',
+            'percentage',
+            'winner',
+            'isWinner',
+            'isEnded',
+            'allCandidates',
+            'rank',
+            'isDraw',
+            'drawCandidates'
+        ));
+    }
+
+    public function export(Candidate $candidate)
+    {
+        $candidate->load([
+            'event:id,user_id,title,description,start_time,end_time,is_published',
+            'event.owner:id,name,email',
+            'votes',
+        ]);
+
+        $now = now();
+        $isEnded = $candidate->event->end_time
+            && $now->greaterThan($candidate->event->end_time);
+
+        $totalVotes = $candidate->event->votes()->count();
+        $candidateVotes = $candidate->votes()->count();
+
+        $winner = $candidate->event
+            ->candidates()
+            ->withCount('votes')
+            ->orderByDesc('votes_count')
+            ->first();
+
+        $isWinner = $winner && $winner->id === $candidate->id;
+
+        $percentage = $totalVotes > 0
+            ? round(($candidateVotes / $totalVotes) * 100, 2)
+            : 0;
+
+        $allCandidates = $candidate->event
+            ->candidates()
+            ->withCount('votes')
+            ->get();
+
+        // Generate PDF menggunakan DomPDF - Gunakan Facade dengan namespace lengkap
+        $pdf = Pdf::loadView('admin.admin.candidates.pdf', compact(
+            'candidate',
+            'candidateVotes',
+            'totalVotes',
+            'percentage',
+            'isWinner',
+            'isEnded',
+            'allCandidates'
+        ));
+
+        $filename = 'kandidat-' . \Str::slug($candidate->name) . '-' . date('YmdHis') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

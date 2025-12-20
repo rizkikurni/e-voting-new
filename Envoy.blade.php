@@ -35,7 +35,7 @@
 
     ln -nfs {{ $storage }} {{ $deployment }}/storage
 
-    composer install --prefer-dist 
+    composer install --prefer-dist
 
     php ./artisan storage:link
 

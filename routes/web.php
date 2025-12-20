@@ -15,9 +15,9 @@ use App\Http\Controllers\VoterTokenController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/vote/{event}', [HomeController::class, 'vote'])
-->name('voting.show');
+    ->name('voting.show');
 Route::post('/vote/{event}', [HomeController::class, 'voteStore'])
-->name('voting.store');
+    ->name('voting.store');
 
 Route::get('/vote-result/{event}', [HomeController::class, 'voteResult'])->name('voting.result');
 
@@ -43,6 +43,21 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('users', UserController::class);
 
     Route::resource('subscription-plans', SubscriptionPlanController::class);
+
+    Route::get('/event/admin', [EventController::class, 'adminIndex'])
+        ->name('admin.events.index');
+
+    Route::get('/event/admin/{event}', [EventController::class, 'adminShow'])
+        ->name('admin.events.show');
+
+    Route::get('/candidates/admin', [CandidateController::class, 'index_admin'])
+        ->name('candidates.admin.index');
+
+    Route::get('/candidates/admin/{candidate}/export', [CandidateController::class, 'export'])
+        ->name('admin.candidates.export');
+
+    Route::get('/candidates/admin/{candidate}', [CandidateController::class, 'show_admin'])
+        ->name('candidates.admin.show');
 });
 // khusus customer / user
 Route::middleware(['auth', 'role:customer'])->group(function () {
@@ -170,43 +185,41 @@ Route::middleware(['auth', 'role:customer,admin'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('admin')->middleware('auth')->group(function () {
+// Route::prefix('admin')->middleware('auth')->group(function () {
 
-    Route::get('/dashboard', fn() => 'Admin Dashboard')
-        ->name('admin.dashboard');
+//     Route::get('/dashboard', fn() => 'Admin Dashboard')
+//         ->name('admin.dashboard');
 
-    // EVENTS
-    Route::get('/events', fn() => 'All Events')
-        ->name('admin.events.index');
+//
 
-    // CANDIDATES
-    Route::get('/candidates', fn() => 'All Candidates')
-        ->name('admin.candidates.index');
+//     // CANDIDATES
+//     Route::get('/candidates', fn() => 'All Candidates')
+//         ->name('admin.candidates.index');
 
-    // TOKENS
-    Route::get('/tokens', fn() => 'All Tokens')
-        ->name('admin.tokens.index');
+//     // TOKENS
+//     Route::get('/tokens', fn() => 'All Tokens')
+//         ->name('admin.tokens.index');
 
-    // VOTES
-    Route::get('/votes', fn() => 'Vote Recap')
-        ->name('admin.votes.index');
+//     // VOTES
+//     Route::get('/votes', fn() => 'Vote Recap')
+//         ->name('admin.votes.index');
 
-    // PAYMENTS
-    Route::get('/payments', fn() => 'All Payments')
-        ->name('admin.payments.index');
+//     // PAYMENTS
+//     Route::get('/payments', fn() => 'All Payments')
+//         ->name('admin.payments.index');
 
-    // USER SUBSCRIPTIONS
-    Route::get('/subscriptions', fn() => 'User Subscriptions')
-        ->name('admin.subscriptions.index');
+//     // USER SUBSCRIPTIONS
+//     Route::get('/subscriptions', fn() => 'User Subscriptions')
+//         ->name('admin.subscriptions.index');
 
-    // MANAGE PLANS
-    Route::get('/plans', fn() => 'Manage Plans')
-        ->name('plans.management');
+//     // MANAGE PLANS
+//     Route::get('/plans', fn() => 'Manage Plans')
+//         ->name('plans.management');
 
-    // USERS
-    Route::get('/users', fn() => 'User Management')
-        ->name('users.index');
-});
+//     // USERS
+//     Route::get('/users', fn() => 'User Management')
+//         ->name('users.index');
+// });
 
 /*
 |--------------------------------------------------------------------------

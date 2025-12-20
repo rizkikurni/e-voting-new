@@ -27,74 +27,74 @@ class EventController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    // Ambil semua user_plan milik user yang:
-    // - status paid
-    // - masih punya sisa kuota event
-    $userPlans = $user->plans()
-        ->where('payment_status', 'paid')
-        ->get()
-        ->filter(fn ($plan) => $plan->hasAvailableEvent());
+        // Ambil semua user_plan milik user yang:
+        // - status paid
+        // - masih punya sisa kuota event
+        $userPlans = $user->plans()
+            ->where('payment_status', 'paid')
+            ->get()
+            ->filter(fn($plan) => $plan->hasAvailableEvent());
 
-    if ($userPlans->isEmpty()) {
-        abort(403, 'Tidak ada paket aktif dengan sisa kuota event.');
+        if ($userPlans->isEmpty()) {
+            abort(403, 'Tidak ada paket aktif dengan sisa kuota event.');
+        }
+
+        return view('admin.events.create', compact('userPlans'));
     }
-
-    return view('admin.events.create', compact('userPlans'));
-}
 
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    $request->validate([
-        'user_plan_id' => 'required|exists:user_plans,id',
-        'title'        => 'required|string|max:255',
-        'description'  => 'nullable|string',
-        'start_time'   => 'required|date',
-        'end_time'     => 'required|date|after:start_time',
-    ]);
-
-    $user = Auth::user();
-
-    // Ambil user_plan yang dipilih, pastikan:
-    // - milik user
-    // - status paid
-    $userPlan = UserPlan::where('id', $request->user_plan_id)
-        ->where('user_id', $user->id)
-        ->where('payment_status', 'paid')
-        ->firstOrFail();
-
-    // Cek kuota
-    if (! $userPlan->hasAvailableEvent()) {
-        abort(403, 'Kuota event pada paket ini sudah habis.');
-    }
-
-    DB::transaction(function () use ($request, $user, $userPlan) {
-
-        Event::create([
-            'user_id'        => $user->id,
-            'user_plan_id'   => $userPlan->id,
-            'plan_id'        => $userPlan->plan_id,
-            'title'          => $request->title,
-            'description'    => $request->description,
-            'start_time'     => $request->start_time,
-            'end_time'       => $request->end_time,
-            'is_trial_event' => false,
+    {
+        $request->validate([
+            'user_plan_id' => 'required|exists:user_plans,id',
+            'title'        => 'required|string|max:255',
+            'description'  => 'nullable|string',
+            'start_time'   => 'required|date',
+            'end_time'     => 'required|date|after:start_time',
         ]);
 
-        // Kurangi kuota
-        $userPlan->increment('used_event');
-    });
+        $user = Auth::user();
 
-    return redirect()
-        ->route('events.index')
-        ->with('success', 'Event berhasil dibuat.');
-}
+        // Ambil user_plan yang dipilih, pastikan:
+        // - milik user
+        // - status paid
+        $userPlan = UserPlan::where('id', $request->user_plan_id)
+            ->where('user_id', $user->id)
+            ->where('payment_status', 'paid')
+            ->firstOrFail();
+
+        // Cek kuota
+        if (! $userPlan->hasAvailableEvent()) {
+            abort(403, 'Kuota event pada paket ini sudah habis.');
+        }
+
+        DB::transaction(function () use ($request, $user, $userPlan) {
+
+            Event::create([
+                'user_id'        => $user->id,
+                'user_plan_id'   => $userPlan->id,
+                'plan_id'        => $userPlan->plan_id,
+                'title'          => $request->title,
+                'description'    => $request->description,
+                'start_time'     => $request->start_time,
+                'end_time'       => $request->end_time,
+                'is_trial_event' => false,
+            ]);
+
+            // Kurangi kuota
+            $userPlan->increment('used_event');
+        });
+
+        return redirect()
+            ->route('events.index')
+            ->with('success', 'Event berhasil dibuat.');
+    }
 
     /**
      * Display the specified resource.
@@ -208,4 +208,49 @@ class EventController extends Controller
         return back()->with('success', 'Event dikunci.');
     }
 
+    public function adminIndex()
+    {
+        $events = Event::with([
+            'owner:id,name,email',
+            'plan:id,name',
+        ])
+            ->latest()
+            ->get();
+
+        return view('admin.admin.events.index', compact('events'));
+    }
+
+    /**
+     * ADMIN - Detail event
+     */
+    public function adminShow(Event $event)
+    {
+        $event->load([
+            'owner:id,name,email',
+            'plan:id,name',
+            'candidates.votes', // penting
+        ]);
+
+        // Hitung suara tiap kandidat
+        $candidates = $event->candidates->map(function ($candidate) {
+            $candidate->vote_count = $candidate->votes->count();
+            return $candidate;
+        });
+
+        // Tentukan kandidat unggul (sementara / final)
+        $winner = null;
+        if ($candidates->count() > 0) {
+            $winner = $candidates->sortByDesc('vote_count')->first();
+        }
+
+        // Event sudah berakhir?
+        $isFinished = now()->greaterThan($event->end_time);
+
+        return view('admin.admin.events.show', compact(
+            'event',
+            'candidates',
+            'winner',
+            'isFinished'
+        ));
+    }
 }

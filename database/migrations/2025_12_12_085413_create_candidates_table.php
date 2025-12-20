@@ -11,10 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('candidates', function (Blueprint $table) {
+        Schema::create('candidates', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('event_id')->constrained()->onDelete('cascade');
+            $table->uuid('event_id');
+
+            $table->foreign('event_id')
+                ->references('id')
+                ->on('events')
+                ->cascadeOnDelete();
 
             $table->string('name');
             $table->text('description')->nullable();

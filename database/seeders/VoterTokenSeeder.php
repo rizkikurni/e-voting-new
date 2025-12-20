@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\VoterToken;
 use App\Models\Event;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class VoterTokenSeeder extends Seeder
 {
@@ -13,18 +14,17 @@ class VoterTokenSeeder extends Seeder
         $events = Event::all();
 
         foreach ($events as $event) {
-            $total = rand(10, 100);
+            $total = rand(20, 100);
 
             for ($i = 0; $i < $total; $i++) {
-                $token = strtoupper(\Illuminate\Support\Str::random(6));
 
-                while (VoterToken::where('token', $token)->exists()) {
-                    $token = strtoupper(\Illuminate\Support\Str::random(6));
-                }
+                do {
+                    $token = strtoupper(Str::random(6));
+                } while (VoterToken::where('token', $token)->exists());
 
                 VoterToken::create([
-                    'event_id' => $event->id,
-                    'token' => $token,
+                    'event_id' => $event->id, // UUID
+                    'token'    => $token,
                 ]);
             }
         }
