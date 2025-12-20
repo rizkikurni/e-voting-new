@@ -50,9 +50,15 @@
                             @endguest
 
                             @auth
-                                <a href="{{ route('dashboard') }}" class="btn">
-                                    Dashboard
-                                </a>
+                                @if (auth()->user()->role === 'admin')
+                                    <a href="{{ route('admin.dashboard') }}" class="btn">
+                                        Dashboard
+                                    </a>
+                                @else
+                                    <a href="{{ route('dashboard') }}" class="btn">
+                                        Dashboard
+                                    </a>
+                                @endif
                             @endauth
 
                         </div>
