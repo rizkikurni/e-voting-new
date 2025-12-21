@@ -52,7 +52,7 @@ class MidtransCallbackController extends Controller
             'transaction_status' => $payload['transaction_status'],
             'fraud_status'       => $payload['fraud_status'] ?? null,
             'transaction_time'   => $payload['transaction_time'] ?? null,
-            'payload_response'   => json_encode($payload),
+            'payload_response' => $payload,
         ]);
 
         // ===============================
