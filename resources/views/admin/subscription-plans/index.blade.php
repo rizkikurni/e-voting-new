@@ -27,6 +27,7 @@
                             <th>Max Event</th>
                             <th>Max Kandidat</th>
                             <th>Max Pemilih</th>
+                            <th>Rekomendasi</th>
                             <th width="200">Aksi</th>
                         </tr>
                     </thead>
@@ -39,6 +40,7 @@
                                 <td>{{ $plan->max_event }}</td>
                                 <td>{{ $plan->max_candidates }}</td>
                                 <td>{{ $plan->max_voters }}</td>
+                                <td>{{ $plan->is_recommended == 'yes' ? 'Ya' : 'Tidak' }}</td>
                                 <td>
                                     <a href="{{ route('subscription-plans.show', $plan->id) }}"
                                         class="btn btn-info btn-sm">Detail</a>

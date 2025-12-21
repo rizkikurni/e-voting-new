@@ -24,6 +24,14 @@
                                 value="{{ $subscriptionPlan->price }}">
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label">Rekomendasi</label>
+                            <select name="is_recommended" class="form-control">
+                                <option value="no" {{ $subscriptionPlan->is_recommended == 'no' ? 'selected' : '' }}>Tidak</option>
+                                <option value="yes" {{ $subscriptionPlan->is_recommended == 'yes' ? 'selected' : '' }}>Ya</option>
+                            </select>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Max Event</label>

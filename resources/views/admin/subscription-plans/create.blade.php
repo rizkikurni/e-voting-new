@@ -22,6 +22,14 @@
                             <input type="number" name="price" class="form-control">
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label">Rekomendasi</label>
+                            <select name="is_recommended" class="form-control">
+                                <option value="no">Tidak</option>
+                                <option value="yes">Ya</option>
+                            </select>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Max Event</label>

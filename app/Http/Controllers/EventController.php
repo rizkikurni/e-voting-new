@@ -30,20 +30,17 @@ class EventController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil semua user_plan milik user yang:
-        // - status paid
-        // - masih punya sisa kuota event
         $userPlans = $user->plans()
             ->where('payment_status', 'paid')
             ->get()
             ->filter(fn($plan) => $plan->hasAvailableEvent());
 
-        if ($userPlans->isEmpty()) {
-            abort(403, 'Tidak ada paket aktif dengan sisa kuota event.');
-        }
+        // Flag untuk view
+        $hasActivePlan = $userPlans->isNotEmpty();
 
-        return view('admin.events.create', compact('userPlans'));
+        return view('admin.events.create', compact('userPlans', 'hasActivePlan'));
     }
+
 
 
     /**
