@@ -257,46 +257,38 @@ class AdminController extends Controller
         }
 
         $timeLabels = [];
-        $timeIntervals = []; // Ganti nama variable
+        $timePoints = []; // Waktu checkpoint untuk kumulatif
 
-        // Generate time labels dan hitung total interval
+        // Generate time labels
         $currentTime = $startTime->copy();
 
-        while ($currentTime < $endTime) { // Ubah <= jadi < untuk avoid duplicate
-            $nextTime = $currentTime->copy()->addHours($intervalHours);
-
-            // Pastikan nextTime tidak melebihi endTime
-            if ($nextTime > $endTime) {
-                $nextTime = $endTime->copy();
-            }
-
+        while ($currentTime <= $endTime) {
             $timeLabels[] = $currentTime->format('d M H:i');
-            $timeIntervals[] = [
-                'start' => $currentTime->copy(),
-                'end' => $nextTime->copy()
-            ];
+            $timePoints[] = $currentTime->copy();
 
-            $currentTime = $nextTime->copy(); // Penting: pakai copy()
+            $currentTime->addHours($intervalHours);
+
+            // Pastikan include endTime sebagai point terakhir
+            if ($currentTime > $endTime && end($timePoints) < $endTime) {
+                $timeLabels[] = $endTime->format('d M H:i');
+                $timePoints[] = $endTime->copy();
+                break;
+            }
         }
 
-        // Ambil data voting per kandidat per waktu
+        // Ambil data voting per kandidat per waktu (KUMULATIF dari awal)
         $candidateTimeline = [];
 
         foreach ($event->candidates as $candidate) {
             $voteCounts = [];
-            $cumulativeVotes = 0;
 
-            foreach ($timeIntervals as $timeRange) { // Ganti nama variable
-                // Hitung votes dalam interval SAAT INI
-                $votesInInterval = $candidate->votes()
-                    ->whereBetween('voted_at', [
-                        $timeRange['start']->toDateTimeString(),
-                        $timeRange['end']->toDateTimeString()
-                    ])
+            foreach ($timePoints as $timePoint) {
+                // ✅ PERBAIKAN: Hitung KUMULATIF dari START sampai timePoint
+                $cumulativeVotes = $candidate->votes()
+                    ->where('voted_at', '>=', $startTime->toDateTimeString())
+                    ->where('voted_at', '<=', $timePoint->toDateTimeString())
                     ->count();
 
-                // Tambahkan ke kumulatif
-                $cumulativeVotes += $votesInInterval;
                 $voteCounts[] = $cumulativeVotes;
             }
 

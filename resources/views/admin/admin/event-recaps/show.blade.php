@@ -17,8 +17,7 @@
             </div>
 
             <div class="d-flex gap-2">
-                <button class="btn btn-danger"
-                    onclick="window.location.href='{{ route('event-recaps.export-pdf', $event->id) }}'">
+                <button class="btn btn-danger" onclick="exportToPDF()">
                     <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
                 </button>
                 <a href="{{ route('event-recaps.index') }}" class="btn btn-outline-secondary">
@@ -709,17 +708,14 @@
         });
 
         // TIMELINE CHART (Line Chart)
-        // Data dummy untuk demo - nanti diganti dengan data real dari backend
+        // TIMELINE CHART dengan data REAL dari backend
         const timelineData = {
-            labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00', '24:00'],
+            labels: @json($timelineData['labels']),
             datasets: [
-                @foreach ($candidates as $index => $c)
+                @foreach ($timelineData['datasets'] as $index => $dataset)
                     {
-                        label: "{{ $c->name }}",
-                        data: [0, {{ rand(1, 5) }}, {{ rand(5, 10) }}, {{ rand(10, 15) }},
-                            {{ rand(15, 20) }}, {{ rand(20, 25) }}, {{ rand(25, 30) }},
-                            {{ rand(30, $c->votes_count - 5) }}, {{ $c->votes_count }}
-                        ],
+                        label: "{{ $dataset['name'] }}",
+                        data: @json($dataset['data']),
                         borderColor: chartColors[{{ $index }}],
                         backgroundColor: chartColors[{{ $index }}] + '20',
                         tension: 0.4,
@@ -759,9 +755,11 @@
                     x: {
                         ticks: {
                             font: {
-                                size: 12,
+                                size: 11,
                                 weight: '600'
-                            }
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
                         },
                         grid: {
                             color: 'rgba(0,0,0,0.05)'
@@ -792,6 +790,9 @@
                             size: 13
                         },
                         callbacks: {
+                            title: function(context) {
+                                return 'Waktu: ' + context[0].label;
+                            },
                             label: function(context) {
                                 return context.dataset.label + ': ' + context.raw + ' suara';
                             }

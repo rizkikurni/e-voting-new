@@ -68,4 +68,8 @@ class Event extends Model
     {
         return !$this->is_locked && !$this->is_published;
     }
+    public function usedTokens()
+    {
+        return $this->hasMany(VoterToken::class)->where('is_used', true);
+    }
 }
