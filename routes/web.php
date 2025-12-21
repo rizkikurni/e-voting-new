@@ -65,6 +65,27 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/payments/admin/{payment}', [AdminController::class, 'show'])
         ->name('payments.admin.show');
+
+    Route::get('/subscriptions/admin', [AdminController::class, 'index_subscriptions'])
+        ->name('admin.subscriptions.index');
+
+    Route::get('/subscriptions/admin/{plan}', [AdminController::class, 'show_subscription'])
+        ->name('admin.subscriptions.show');
+
+    Route::get('/tokens/admin', [AdminController::class, 'index_tokens'])
+        ->name('admin.tokens.index');
+
+    Route::get('/tokens/admin/{token}', [AdminController::class, 'show_token'])
+        ->name('admin.tokens.show');
+
+    Route::get('/event-recaps/admin', [AdminController::class, 'index_recaps'])
+        ->name('event-recaps.index');
+
+    Route::get('/event-recaps/admin/{event}', [AdminController::class, 'show_recaps'])
+        ->name('event-recaps.show');
+
+    Route::get('/event-recaps/admin/{event}/export-pdf', [AdminController::class, 'export_pdf_recaps'])
+        ->name('event-recaps.export-pdf');
 });
 // khusus customer / user
 Route::middleware(['auth', 'role:customer'])->group(function () {
