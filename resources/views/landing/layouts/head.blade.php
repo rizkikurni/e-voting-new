@@ -20,3 +20,26 @@
  <link rel="stylesheet" href="{{ asset('landing/css/default.css') }}">
  <link rel="stylesheet" href="{{ asset('landing/css/style.css') }}">
  <link rel="stylesheet" href="{{ asset('landing/css/responsive.css') }}">
+
+ <style>
+     .pricing-box {
+         height: 100%;
+         min-height: 520px;
+         display: flex;
+         flex-direction: column;
+     }
+
+     .pricing-body {
+         flex-grow: 1;
+         display: flex;
+         flex-direction: column;
+     }
+
+     .pricing-box ul {
+         min-height: 160px;
+     }
+
+     .pricing-btn {
+         margin-top: auto;
+     }
+ </style>

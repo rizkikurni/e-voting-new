@@ -297,30 +297,37 @@
                 </div>
             </div>
             <div class="container">
-                <div class="row">
+                <div class="row align-items-stretch">
 
-                    @foreach ($plans as $index => $plan)
-                        <div class="col-lg-4 col-md-6">
+                    @foreach ($plans as $plan)
+                        @php
+                            $isRecommended = $plan->is_recommended === 'yes';
+                        @endphp
+
+                        <div class="col-lg-4 col-md-6 d-flex">
                             <div class="pricing-box
-                    {{ $index == 1 ? 'active' : '' }}
-                    text-center mb-30 wow fadeInDown animated"
+                    {{ $isRecommended ? 'active' : '' }}
+                    text-center mb-30 wow fadeInDown animated
+                    d-flex flex-column w-100"
                                 data-animation="fadeInDown animated" data-delay=".2s">
 
-                                @if ($index == 1)
+                                {{-- TAG REKOMENDASI --}}
+                                @if ($isRecommended)
                                     <div class="tag">Rekomendasi</div>
                                 @endif
 
+                                {{-- HEADER --}}
                                 <div class="pricing-head">
                                     <h4>{{ strtoupper($plan->name) }}</h4>
                                     <div class="price-count mb-30">
                                         <h2>
-                                            <small>Rp</small>
-                                            {{ number_format($plan->price, 0, ',', '.') }}
+                                            <small>Rp</small>{{ intval($plan->price / 1000) }}K
                                         </h2>
                                     </div>
                                 </div>
 
-                                <div class="pricing-body mb-40">
+                                {{-- BODY --}}
+                                <div class="pricing-body mb-40 d-flex flex-column flex-grow-1">
                                     <p>
                                         Cocok untuk kebutuhan {{ strtolower($plan->name) }} dengan fitur lengkap.
                                     </p>
@@ -343,8 +350,10 @@
                                         @endif
                                     </ul>
 
-                                    <div class="pricing-btn mt-40">
-                                        <a href="{{ route('checkout', $plan->id) }}" class="btn">
+                                    {{-- BUTTON --}}
+                                    <div class="pricing-btn mt-auto pt-3">
+                                        <a href="{{ route('checkout', $plan->id) }}"
+                                            class="btn {{ $isRecommended ? 'btn-primary' : '' }}">
                                             <i class="far fa-ticket-alt"></i> Pilih Paket
                                         </a>
                                     </div>
@@ -356,6 +365,8 @@
 
                 </div>
             </div>
+
+
 
         </section>
         <!-- pricing-area-end -->

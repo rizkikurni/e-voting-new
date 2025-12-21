@@ -13,6 +13,7 @@ class SubscriptionPlan extends Model
         'max_event',
         'max_candidates',
         'max_voters',
+        'is_recommended',
     ];
 
     protected $casts = [

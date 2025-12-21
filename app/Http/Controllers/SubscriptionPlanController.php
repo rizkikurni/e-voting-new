@@ -28,6 +28,7 @@ class SubscriptionPlanController extends Controller
             'max_event'      => 'required|integer|min:1',
             'max_candidates' => 'required|integer|min:1',
             'max_voters'     => 'required|integer|min:1',
+            'is_recommended' => 'required|in:yes,no'
         ]);
 
         // Samakan dengan seeder (boolean feature)
@@ -44,6 +45,7 @@ class SubscriptionPlanController extends Controller
             'max_event'      => $request->max_event,
             'max_candidates' => $request->max_candidates,
             'max_voters'     => $request->max_voters,
+            'is_recommended' => $request->is_recommended,
         ]);
 
         return redirect()
@@ -69,6 +71,7 @@ class SubscriptionPlanController extends Controller
             'max_event'      => 'required|integer|min:1',
             'max_candidates' => 'required|integer|min:1',
             'max_voters'     => 'required|integer|min:1',
+            'is_recommended' => 'required|in:yes,no'
         ]);
 
         $features = [
@@ -84,6 +87,7 @@ class SubscriptionPlanController extends Controller
             'max_event'      => $request->max_event,
             'max_candidates' => $request->max_candidates,
             'max_voters'     => $request->max_voters,
+            'is_recommended' => $request->is_recommended,
         ]);
 
         return redirect()
