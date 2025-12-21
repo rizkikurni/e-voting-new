@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CandidateController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
@@ -58,6 +59,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/candidates/admin/{candidate}', [CandidateController::class, 'show_admin'])
         ->name('candidates.admin.show');
+
+    Route::get('/payments/admin', [AdminController::class, 'index'])
+        ->name('payments.admin.index');
+
+    Route::get('/payments/admin/{payment}', [AdminController::class, 'show'])
+        ->name('payments.admin.show');
 });
 // khusus customer / user
 Route::middleware(['auth', 'role:customer'])->group(function () {

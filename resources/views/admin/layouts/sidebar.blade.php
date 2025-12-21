@@ -120,9 +120,9 @@
             </li>
 
             <li>
-                <a href="">
+                <a href="{{ route('payments.admin.index') }}">
                     <div class="parent-icon"><i class="bi bi-cash-coin"></i></div>
-                    <div class="menu-title">Pembayaran (Midtrans)</div>
+                    <div class="menu-title">Pembayaran</div>
                 </a>
             </li>
 
