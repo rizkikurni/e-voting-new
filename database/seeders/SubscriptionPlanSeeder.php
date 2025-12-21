@@ -16,6 +16,7 @@ class SubscriptionPlanSeeder extends Seeder
             'max_event' => 1,
             'max_candidates' => 10,
             'max_voters' => 100,
+            'is_recommended' => 'no',
         ]);
 
         SubscriptionPlan::create([
@@ -25,6 +26,7 @@ class SubscriptionPlanSeeder extends Seeder
             'max_event' => 5,
             'max_candidates' => 50,
             'max_voters' => 1000,
+            'is_recommended' => 'yes',
         ]);
 
         SubscriptionPlan::create([
@@ -34,6 +36,7 @@ class SubscriptionPlanSeeder extends Seeder
             'max_event' => 999,
             'max_candidates' => 999,
             'max_voters' => 999999,
+            'is_recommended' => 'no',
         ]);
 
         $this->command->info('Subscription plans seeded successfully!');

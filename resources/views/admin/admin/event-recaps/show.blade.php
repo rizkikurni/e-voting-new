@@ -17,7 +17,8 @@
             </div>
 
             <div class="d-flex gap-2">
-                <button class="btn btn-danger" onclick="exportToPDF()">
+                <button class="btn btn-danger"
+                    onclick="window.location.href='{{ route('event-recaps.export-pdf', $event->id) }}'">
                     <i class="bi bi-file-earmark-pdf-fill"></i> Export PDF
                 </button>
                 <a href="{{ route('event-recaps.index') }}" class="btn btn-outline-secondary">
@@ -801,9 +802,5 @@
                 }
             }
         });
-
-        function exportToPDF() {
-            alert('Fitur export PDF akan segera tersedia');
-        }
     </script>
 @endpush
