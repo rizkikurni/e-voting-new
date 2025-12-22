@@ -1,59 +1,110 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📌 Proyek Akhir – Pemrograman Framework  
+## 🎯 Tema: E-Voting Berbasis Subscription
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+## 🎓 Program Studi
+**Informatika**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 👥 Anggota Kelompok
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Nama                         | NIM       |
+|------------------------------|-----------|
+| Muhammad Rizki Kurniawan     | 22670033  |
+| Danu Candra Saputra          | 22670008  |
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 📖 Deskripsi Proyek
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Proyek ini merupakan **Proyek Akhir Mata Kuliah Pemrograman Framework** yang dikembangkan menggunakan **framework Laravel**.  
+Aplikasi yang dibangun adalah **sistem e-voting dan manajemen event voting** yang dilengkapi dengan **sistem pembayaran online menggunakan Midtrans** untuk mengelola paket atau layanan berbayar.
 
-## Laravel Sponsors
+Aplikasi ini menerapkan konsep **MVC (Model–View–Controller)**, relasi database, autentikasi pengguna, serta integrasi **payment gateway Midtrans** sebagai simulasi sistem transaksi digital pada aplikasi berbasis web modern.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🎯 Tujuan Pembuatan
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- Menerapkan pemrograman berbasis framework **Laravel**
+- Mengimplementasikan konsep **MVC**, routing, dan controller
+- Mengelola database menggunakan **migration** dan **relasi**
+- Mengintegrasikan **payment gateway Midtrans**
+- Mengelola transaksi dan status pembayaran
+- Membangun sistem **e-voting yang terstruktur dan aman**
+- Melatih kerja sama tim dalam pengembangan aplikasi web
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## ⚙️ Teknologi yang Digunakan
 
-## Code of Conduct
+### Backend
+- **Framework** : Laravel  
+- **Bahasa Pemrograman** : PHP  
+- **Database** : MySQL  
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Frontend
+- Blade Template  
+- Bootstrap  
 
-## Security Vulnerabilities
+### Payment Gateway
+- **Midtrans (Sandbox Mode)**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Tools Pendukung
+- Composer  
+- Git & GitHub  
+- Visual Studio Code  
+- XAMPP / Laragon  
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## ✨ Fitur Utama Aplikasi
+
+- Manajemen Event Voting
+- Manajemen Kandidat
+- Sistem Token Pemilih (sekali pakai)
+- Sistem Voting & Rekapitulasi Suara
+- Dashboard Statistik
+- Autentikasi & Otorisasi Admin
+- Sistem Pembayaran Online (Midtrans)
+- Manajemen Paket / Subscription Event
+- Monitoring Status Transaksi:
+  - Pending
+  - Paid
+  - Failed
+
+---
+
+## 💳 Integrasi Midtrans
+
+Aplikasi ini menggunakan **Midtrans (Sandbox Mode)** sebagai payment gateway untuk simulasi pembayaran paket atau layanan event voting.
+
+### Alur Pembayaran:
+1. User memilih paket atau layanan event
+2. Sistem membuat transaksi dan mengirim request ke Midtrans
+3. Midtrans mengembalikan **token transaksi**
+4. User melakukan pembayaran melalui **popup Midtrans**
+5. Midtrans mengirimkan **notifikasi (callback)**
+6. Sistem memperbarui status pembayaran secara otomatis
+
+---
+
+## 📌 Konsep Sistem
+
+Aplikasi e-voting ini menggunakan model **subscription-based system**, di mana:
+- User harus membeli paket terlebih dahulu
+- Setiap paket memiliki batasan (jumlah event, kandidat, pemilih)
+- Event hanya dapat dijalankan jika pembayaran berstatus **Paid**
+
+Konsep ini mensimulasikan aplikasi **SaaS (Software as a Service)**.
+
+---
+
+## 📌 Penutup
+
+Proyek ini dikembangkan sebagai bentuk penerapan materi **Pemrograman Framework** dengan studi kasus nyata yang mengombinasikan **sistem e-voting** dan **payment gateway Midtrans**.  
+Melalui proyek ini, mahasiswa diharapkan mampu memahami pengembangan aplikasi web modern yang terintegrasi dengan layanan pihak ketiga serta menerapkan praktik pengembangan aplikasi yang terstruktur.
+
+---
