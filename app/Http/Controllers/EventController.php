@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\UserPlan;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -100,10 +103,317 @@ class EventController extends Controller
     {
         $this->authorizeOwner($event);
 
-        $event->load(['candidates', 'tokens', 'votes']);
+        // Load relasi dengan optimal query
+        $event->load([
+            'owner:id,name,email',
+            'candidates' => function ($q) {
+                $q->withCount('votes')
+                    ->orderByDesc('votes_count');
+            }
+        ]);
 
-        return view('admin.events.show', compact('event'));
+        // Ambil kandidat yang sudah tersortir
+        $candidates = $event->candidates;
+
+        // Hitung total votes
+        $totalVotes = $event->votes()->count();
+
+        // Tentukan pemenang
+        $winner = $candidates->first();
+
+        // Cek apakah event sudah selesai
+        $isEnded = $event->end_time && now()->greaterThan($event->end_time);
+
+        // DATA TIMELINE: Ambil voting per jam untuk chart timeline
+        $timelineData = $this->getVotingTimeline($event);
+
+        return view('admin.events.show', compact(
+            'event',
+            'candidates',
+            'totalVotes',
+            'winner',
+            'isEnded',
+            'timelineData'
+        ));
     }
+
+    /**
+     * Generate data timeline voting per kandidat berdasarkan waktu vote (voted_at)
+     */
+    private function getVotingTimeline(Event $event)
+    {
+        $startTime = $event->start_time;
+        $endTime = $event->end_time ?? now();
+
+        // Hitung durasi event dalam jam
+        $durationHours = $startTime->diffInHours($endTime);
+
+        // Tentukan interval berdasarkan durasi
+        if ($durationHours <= 24) {
+            $intervalHours = 3; // Setiap 3 jam untuk event 1 hari
+        } elseif ($durationHours <= 168) {
+            $intervalHours = 12; // Setiap 12 jam untuk event 1 minggu
+        } else {
+            $intervalHours = 24; // Setiap 1 hari untuk event > 1 minggu
+        }
+
+        $timeLabels = [];
+        $timePoints = []; // Waktu checkpoint untuk kumulatif
+
+        // Generate time labels
+        $currentTime = $startTime->copy();
+
+        while ($currentTime <= $endTime) {
+            $timeLabels[] = $currentTime->format('d M H:i');
+            $timePoints[] = $currentTime->copy();
+
+            $currentTime->addHours($intervalHours);
+
+            // Pastikan include endTime sebagai point terakhir
+            if ($currentTime > $endTime && end($timePoints) < $endTime) {
+                $timeLabels[] = $endTime->format('d M H:i');
+                $timePoints[] = $endTime->copy();
+                break;
+            }
+        }
+
+        // Ambil data voting per kandidat per waktu (KUMULATIF dari awal)
+        $candidateTimeline = [];
+
+        foreach ($event->candidates as $candidate) {
+            $voteCounts = [];
+
+            foreach ($timePoints as $timePoint) {
+                // ✅ PERBAIKAN: Hitung KUMULATIF dari START sampai timePoint
+                $cumulativeVotes = $candidate->votes()
+                    ->where('voted_at', '>=', $startTime->toDateTimeString())
+                    ->where('voted_at', '<=', $timePoint->toDateTimeString())
+                    ->count();
+
+                $voteCounts[] = $cumulativeVotes;
+            }
+
+            $candidateTimeline[] = [
+                'name' => $candidate->name,
+                'data' => $voteCounts
+            ];
+        }
+
+        return [
+            'labels' => $timeLabels,
+            'datasets' => $candidateTimeline
+        ];
+    }
+
+    public function exportPdf(Event $event)
+    {
+        $this->authorizeOwner($event);
+
+        // Load relasi dengan optimal query
+        $event->load([
+            'owner:id,name,email',
+            'candidates' => function ($q) {
+                $q->withCount('votes')
+                    ->orderByDesc('votes_count');
+            }
+        ]);
+
+        // Ambil kandidat yang sudah tersortir
+        $candidates = $event->candidates;
+
+        // Hitung total votes
+        $totalVotes = $event->votes()->count();
+
+        // Tentukan pemenang
+        $winner = $candidates->first();
+
+        // Cek apakah event sudah selesai
+        $isEnded = $event->end_time && now()->greaterThan($event->end_time);
+
+        // DATA TIMELINE: Ambil voting per jam untuk chart timeline
+        $timelineData = $this->getVotingTimeline($event);
+
+        // Generate chart images untuk PDF
+        $chartImages = $this->generateChartImages($event, $candidates, $totalVotes, $timelineData);
+
+        // Load view PDF
+        $pdf = Pdf::loadView('admin.events.pdf', compact(
+            'event',
+            'candidates',
+            'totalVotes',
+            'winner',
+            'isEnded',
+            'timelineData',
+            'chartImages'
+        ));
+
+        // Set paper size dan orientation
+        $pdf->setPaper('a4', 'portrait');
+
+        // Generate filename
+        $filename = 'Rekap_Event_' . Str::slug($event->title) . '_' . now()->format('Ymd_His') . '.pdf';
+
+        // Download PDF
+        return $pdf->download($filename);
+    }
+    /**
+     * Generate chart images untuk PDF menggunakan QuickChart API
+     * PERBAIKAN: Convert ke base64 untuk reliability di PDF
+     */
+    private function generateChartImages($event, $candidates, $totalVotes, $timelineData)
+    {
+        $chartColors = [
+            '#667eea',
+            '#764ba2',
+            '#11998e',
+            '#38ef7d',
+            '#f093fb',
+            '#f5576c',
+            '#4facfe',
+            '#00f2fe',
+            '#fa709a',
+            '#fee140',
+            '#30cfd0',
+            '#330867'
+        ];
+
+        // Data untuk charts
+        $candidateLabels = $candidates->pluck('name')->toArray();
+        $candidateVotes = $candidates->pluck('votes_count')->toArray();
+
+        // 1. PIE CHART - Simplified
+        $pieConfig = [
+            'type' => 'doughnut',
+            'data' => [
+                'labels' => $candidateLabels,
+                'datasets' => [[
+                    'data' => $candidateVotes,
+                    'backgroundColor' => array_slice($chartColors, 0, count($candidateLabels)),
+                ]]
+            ],
+            'options' => [
+                'plugins' => [
+                    'legend' => ['position' => 'bottom'],
+                ]
+            ]
+        ];
+
+        // 2. BAR CHART - Simplified
+        $barConfig = [
+            'type' => 'bar',
+            'data' => [
+                'labels' => $candidateLabels,
+                'datasets' => [[
+                    'label' => 'Suara',
+                    'data' => $candidateVotes,
+                    'backgroundColor' => array_slice($chartColors, 0, count($candidateLabels)),
+                ]]
+            ],
+            'options' => [
+                'scales' => ['y' => ['beginAtZero' => true]],
+                'plugins' => ['legend' => ['display' => false]]
+            ]
+        ];
+
+        // 3. LINE CHART - Simplified
+        $lineDatasets = [];
+        foreach ($timelineData['datasets'] as $index => $dataset) {
+            $lineDatasets[] = [
+                'label' => $dataset['name'],
+                'data' => $dataset['data'],
+                'borderColor' => $chartColors[$index % count($chartColors)],
+                'fill' => false,
+                'tension' => 0.4
+            ];
+        }
+
+        $lineConfig = [
+            'type' => 'line',
+            'data' => [
+                'labels' => $timelineData['labels'],
+                'datasets' => $lineDatasets
+            ],
+            'options' => [
+                'scales' => ['y' => ['beginAtZero' => true]],
+                'plugins' => ['legend' => ['position' => 'top']]
+            ]
+        ];
+
+        // Generate base64 images untuk PDF
+        try {
+            return [
+                'pie' => $this->getChartBase64($pieConfig, 500, 300),
+                'bar' => $this->getChartBase64($barConfig, 500, 300),
+                'line' => $this->getChartBase64($lineConfig, 800, 400)
+            ];
+        } catch (\Exception $e) {
+            Log::error('Chart generation failed: ' . $e->getMessage());
+
+            // Fallback: return placeholder images
+            return [
+                'pie' => $this->getPlaceholderImage('Pie Chart'),
+                'bar' => $this->getPlaceholderImage('Bar Chart'),
+                'line' => $this->getPlaceholderImage('Line Chart')
+            ];
+        }
+    }
+
+    /**
+     * Get chart as base64 image dari QuickChart
+     */
+    private function getChartBase64($config, $width, $height)
+    {
+        $url = 'https://quickchart.io/chart';
+
+        // Gunakan POST untuk menghindari URL terlalu panjang
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+            'width' => $width,
+            'height' => $height,
+            'format' => 'png',
+            'chart' => $config
+        ]));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $imageData = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode === 200 && $imageData) {
+            return 'data:image/png;base64,' . base64_encode($imageData);
+        }
+
+        throw new \Exception('Failed to generate chart: HTTP ' . $httpCode);
+    }
+
+    /**
+     * Generate placeholder image jika chart generation gagal
+     */
+    private function getPlaceholderImage($text)
+    {
+        // Simple SVG placeholder
+        $svg = '<?xml version="1.0" encoding="UTF-8"?>
+    <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+        <rect width="500" height="300" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+        <text x="250" y="150" font-family="Arial" font-size="20" fill="#6c757d" text-anchor="middle">
+            ' . htmlspecialchars($text) . ' - Data tidak tersedia
+        </text>
+    </svg>';
+
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+    }
+    /**
+     * Export PDF Recaps untuk Customer
+     */
+    /**
+     * Export PDF Recaps untuk Customer
+     */
+
 
     /**
      * Show the form for editing the specified resource.

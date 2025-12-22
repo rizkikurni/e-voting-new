@@ -91,6 +91,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::resource('events', EventController::class);
+    Route::get('events/{event}/export-pdf', [EventController::class, 'exportPdf'])->name('events.export-pdf');
+
+    Route::post('events/{event}/publish', [EventController::class, 'publish'])->name('events.publish');
+    Route::post('events/{event}/lock', [EventController::class, 'lock'])->name('events.lock');
+
     Route::get('/checkout/{plan}', [CheckoutController::class, 'checkout'])
         ->name('checkout');
 
@@ -121,9 +127,8 @@ Route::middleware(['auth', 'role:customer,admin'])->group(function () {
     Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
     Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
 
-    Route::resource('events', EventController::class);
-    Route::post('events/{event}/publish', [EventController::class, 'publish'])->name('events.publish');
-    Route::post('events/{event}/lock', [EventController::class, 'lock'])->name('events.lock');
+
+
 
     Route::middleware(['auth', 'role:customer,admin'])->group(function () {
         Route::get('/profile', [UserController::class, 'profile'])->name('profile.index');
